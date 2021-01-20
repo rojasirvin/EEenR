@@ -13,4 +13,4 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Aquí podrán encontrar las diapositivas del curso.
 
-[Sesión 1](https://rojasirvin.github.io/EEenR/sesiones/sesion1.html#1). R desde cero
+[Sesión 1](https://rojasirvin.github.io/EEenR/slides/sesion1.html#1). R desde cero
