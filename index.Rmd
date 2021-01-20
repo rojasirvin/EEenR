@@ -1,0 +1,15 @@
+---
+title: "Estadística y Econometría en R"
+date: "Enero-febrero de 2021"
+author: Irvin Rojas
+output: 
+  html_document:
+   theme: yeti
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Aquí podrán encontrar las diapositivas del curso
