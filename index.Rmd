@@ -5,7 +5,6 @@ author: Irvin Rojas
 output: 
   html_document:
    theme: yeti
-
 ---
 
 ```{r setup, include=FALSE}
