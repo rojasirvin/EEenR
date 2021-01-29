@@ -1,0 +1,597 @@
+---
+title: "Bases de datos en R"
+author: "Irvin Rojas"
+date: "30 de enero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 3. Bases de datos en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+
+En esta sesión
+
+1. Aprenderemos a leer datos en R
+
+1. Conoceremos los distintos tipos de datos
+
+1. Aprenderemos cómo usar funciones para manipular datos
+
+1. Crearemos una base de datos a partir de múltiples bases de datos
+
+---
+
+# Bases de datos
+
+En la sesión anterior empezamos a familiarizarnos con una base de datos, *mundata*
+
+Esta base de datos indica la población, el número de camas de hospital y el número de ICU en cada municipio
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+setwd("C:/Users/Irvin/Dropbox/Ejercicios en R/datos/")
+
+mundata <- read_csv(file = "./mundata.csv",
+                    locale = locale(encoding = "latin1"))
+```
+
+--
+
+Noten que al abrir la base agregué una opción (*locale*) para indicar que estamos trabajando datos que tienen caracteres latinos
+
+En esta sesión vamos a *jugar* con nuestra base de datos
+
+---
+
+# Tipos de datos
+
+Vale la pena entender el tipo de datos con los que nos vamos a encontrar
+
+Aquí revisaremos los más comunes y, con la práctica, quizás vaya topándose con otros tipos más complejos
+
+1. Entero (*integer*): números sin decimales
+
+1. Numérico (*numeric*): números posiblemente con decimales
+
+1. Cadena de texto (*character*): letras, números y símbolos (aparecen rodeados por comillas)
+
+1. Factor (*factor*): son datos numéricos etiquetados
+
+1. Faltante (*missing*): representado con NA, significa la ausencia de datos
+
+---
+
+# Operadores de relaciones
+
+Los operadores de relaciones más comúnes son:
+
+|Símbolo | Operación |
+|:---:|:---:|
+| < | menor que |
+| <= | menor o igual que |
+| > | mayor que |
+| >= | mayor o igual que |
+| == | igual que |
+| != | no es igual que |
+
+
+---
+
+# Operadores lógicos
+
+Vamos a introducir una serie de operadores lógicos
+
+Sirven para establecer relaciones entre objetos
+
+|Símbolo | Operación |
+|:---:|:---:|
+| &#124;  | o |
+| & | y |
+| ! | no |
+
+
+---
+
+# Dplyr
+
+Cuando cargamos los paquetes del *tidyverse* cargamos un paquete llamado [*dplyr*](https://dplyr.tidyverse.org/)
+
+*dplyr* es un paquete con herramientas para manipular bases de datos de manera eficiente
+
+Algo muy útil de los paquetes del *tidyverse* son estos [*acordeones*](https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf)
+
+--
+
+Vamos a aprender a usar las funciones más comúnes, pero cuando tengan tareas más complicadas, no duden en recurrir a los *acordeones* o a la ayuda en línea
+
+---
+
+# filter()
+
+La función *filter()* nos permite seleccionar filas de acuerdo al valor de una variable (columna)
+
+Si queremos seleccionar a todos los municipios de Baja California, que tiene el valor de 2 en la variable **clave_ent**, ejecutamos:
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+filter(mundata, clave_ent==2)
+```
+
+Muchas veces vamos a necesitar asignar este subconjunto a un nuevo objeto
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mun.bc <- filter(mundata, clave_ent==3)
+```
+
+Noten que usamos "==" porque estamos haciendo una operación relacional
+
+---
+
+# filter()
+
+Podemos usar combinaciones de operadores lógicos y relacionales
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mun.peninsula.baja <- filter(mundata, clave_ent==2 | clave_ent==3)
+```
+
+--
+
+Si queremos usar muchos condicionales, podemos usar el atajo "%in%"
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+estados.frontera <- c("Baja California",
+                   "Sonora",
+                   "Chihuahua",
+                   "Coahuila",
+                   "Nuevo León",
+                   "Tamaulipas")
+
+mun.frontera <- filter(mundata, nom_ent %in% estados.frontera)
+```
+
+---
+
+# Ejercicio 1
+
+1. Crea un nuevo objeto que tenga a los municipios del Estado de México con más de 10,000 habitantes
+
+--
+
+1. Crea otro objeto que tenga a los municipios en los estados de la frontera y que tengan cada uno más de 100 camas de hospital (**beds**)
+
+--
+
+1. Crea un nuevo objeto que tenga a todos los municipios de México que tengan entre 10 y 20 UCI
+
+---
+
+# arrange()
+
+La función *arrange()* sirve para ordenar los datos de acuerdo al valor de las variables
+
+Tomemos nuestro objeto que tiene a los municipios de Baja California y ordenémoslos de menor a mayor de acuerdo al número de camas de hospital
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+arrange(mun.bc, beds)
+```
+
+--
+
+Si queremos sustituir el objeto por uno que tenga las filas en el orden deseado usamos
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mun.bc <- arrange(mun.bc, beds)
+```
+
+---
+
+# arrange()
+
+La función *arrange()* también nos sirve para ordenar en forma descendente
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mun.bc <- arrange(mun.bc, desc(beds))
+```
+
+---
+
+# select()
+
+La función *select()* nos permite seleccionar variables
+
+Muchas veces las bases de datos contienen miles de variables y solo trabajamos con un puñado de ellas
+
+Es eficiente en términos computacionales seleccionar subconjuntos que nos son útiles
+
+--
+
+Supongamos que solo queremos tener la clave INEGI y la población
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+pob.mun <- select(mundata, clave, pop)
+```
+
+---
+
+# rename()
+
+Usamos la función *rename()* para renombrar variables
+
+Es bueno trabajar con nombres intuitivos y seguir ciertas convenciones
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mundata <- rename(mundata, nom_mun=mun)
+```
+
+---
+
+# mutate()
+
+Para crear nuevas variables usamos *mutate()*
+
+Creamos el número total de camas
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mundata <- mutate(mundata, recursos=beds+icu)
+```
+
+---
+
+# mutate()
+
+Podemos generar variables condicionando en el valor de otras variables
+
+Por ejemplo, generemos una variable dicotómica que tome el valor de uno para los municipios en estados de la región que definimos por "frontera" y cero en otro caso
+
+En este caso hacemos uso de la función *ifelse()*
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mundata <- mutate(mundata,
+                  frontera=ifelse(nom_ent %in% estados.frontera, 1, 0))
+```
+
+--
+
+La función *ifelse()* requiere al menos tres argumentos
+
+- un condicional a evaluar
+- el valor que le asignaremos a la nueva variable **frontera** si la condición se cumple
+- el valor que le asignaremos a la nueva variable **frontera** si la condición n0 se cumple
+
+---
+
+# Ejercicio 2
+
+1. Genere un objeto que contenga los municipios del centro del país (Ciudad de México, Estado de México, Puebla, Tlaxcala y Morelos)
+
+1. En el nuevo objeto, genere una nueva variable que indique el logaritmo natural del número de camas de hospital por cada 100,000 habitantes en dichos municipios
+
+1. Genere un nuevo objeto que contenga solo los municipios donde del centro donde el logaritmo del número de camas por cada 100,000 habitantes sea mayor que 2. ¿Cuántos municipios cumplen esta restricción?
+
+---
+
+# summarise()
+
+La función *summarise()* nos permite calcular estadísticas de las variables
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+summarise(mundata, media.pop=mean(pop))
+```
+
+Noten la sintaxis que se vuelve un poco más complicada aquí
+
+El primer argumento es la base o *data frame* del que queremos hablar
+
+*media.pop* es el nombre que le queremos dar a la estadística cuando aparezca en la pantalla
+
+Dentro de *mean()* decimos que la variable de la que queremos obtener la media es **pop**
+
+--
+
+Si les digo que *sd()* nos da la desviación estándar, ¿cómo obtendrían la desviación estándar de la población en los municipios de Baja California?
+
+
+---
+
+# group_by
+
+Supongan que ahora quisiera obtener el promedio de habitantes por municipio de cada estado
+
+¿Qué se les ocurriría hacer?
+
+--
+
+Con *group_by* agrupamos datos de acuerdo a cierta variable y luego hacemos la misma tarea para cada grupo
+
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+por_estado <- group_by(mundata,clave_ent)
+
+summarise(por_estado, media.pop=mean(pop))
+```
+
+--
+
+Podemos guardar esto en un objeto
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+por_estado <- group_by(mundata,clave_ent)
+
+medias.estado <- summarise(por_estado, media.pop=mean(pop))
+```
+---
+
+# Ejercicio 3
+
+1. Cargue la base original *mundata*
+
+1. Quédese con todas las columnas, excepto **cve_sun** y **nom_sun**
+
+1. Generemos una nueva variable llamda **region** que tome los valores de acuerdo a la definición de regiones en *script_sesion_3.R*: 1 para la región, 2 para la región centro, 3 para la región centro-occidente y 4 para la región sureste
+
+1. Construya un objeto que reporte el promedio del número de camas por cada 100,000 habitantes de los municipios, por región
+
+---
+
+# Factores
+
+Recuerden que antes hablamos de las variables de factores
+
+Los factores toman una variable numérica y le ponen una etiqueta alfanumérica, además de ordenarla en el orden preferido
+
+Vamos a transformar la variable numérica de región en una variable factor
+
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata <- mutate(mundata,
+                  region=factor(region,
+                                levels = c(1,2,3,4),
+                                labels = c("Región Norte",
+                                           "Región Centro",
+                                           "Región Centro-Occidente",
+                                           "Region Sureste")))
+```
+
+--
+
+Los factores nos será muy útiles más adelante
+
+---
+
+# La pipa
+
+Cuando empecemos a hacer tareas más complejas usaremos mucho la pipa: " "%>%"
+
+Pueden introducir este símbolo con la combinación Control+Alt+M
+
+La pipa nos sirve para combinar varias operaciones
+
+--
+
+Antes de que ejecuten lo siguiente en R, ¿díganme con palabras qué esperan que resulte?
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata %>% 
+  filter(region=="Región Centro") %>%
+  mutate(recursos_totales=beds+icu) %>% 
+  mutate(recursos_bajos=ifelse(recursos_totales<100,1,0)) %>%
+  group_by(nom_ent) %>% 
+  summarize(prop.bajos=mean(recursos_bajos)) %>% 
+  ungroup()
+```
+
+---
+
+# Valores NA
+
+Noten que algunos municipios de Oaxaca no tienen datos de camas o UCI
+
+Cuando queremos calcular la media y algún valor falta, R no se salta dicho valor y regresa un error a menos que lo pidamos explícitamente
+
+Debemos agregar la opción *na.rm=TRUE* en la función *mean*
+
+*na.rm=TRUE* significa "NA remove"
+
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata %>% 
+  filter(region=="Región Centro") %>%
+  mutate(recursos_totales=beds+icu) %>% 
+  mutate(recursos_bajos=ifelse(recursos_totales<100,1,0)) %>%
+  group_by(nom_ent) %>% 
+  summarize(prop.bajos=mean(recursos_bajos, na.rm=TRUE)) %>% 
+  ungroup()
+```
+
+---
+
+class: inverse, middle, center
+
+# Varias bases de datos
+
+---
+
+# Unir bases de datos
+
+Ahora que ya sabemos manipular bases de datos, déjenme contarles cómo construí la base *mundata*
+
+1. Usé dos archivos de CONAPO con la población (por sexo y grupo de edad) desde 2015 y proyectada hasta 2030
+
+1. Usé una base de datos de Salud de 2018 que incluye el número de camas y UCI por municipio
+
+1. Use un catálogo que liga a cada municipio con una ciudad del Sistema Urbano Nacional
+
+Una vez que tuve una observación por municipio, uní las bases de acuerdo al código único del INEGI para cada municipio
+
+---
+
+# Unir bases de datos
+
+Todos tienen ya los siguientes archivos
+
+- *base_municipios_final_datos_01.csv*, tiene la primera mitad de municipios
+
+- *base_municipios_final_datos_02.csv*, tiene la segunda mitad de municipios
+
+- *Recursos_Salud_2018.csv*, tiene datos solo de hospitales públicos (de aquí me quedo las UCI)
+
+- *ESTABLECIMIENTO_SALUD_202003.csv*, tiene los datos de todas las unidades de salud, públicas y privadas (de aquí saco **beds**)
+
+- *Base_SUN_2018.csv*, tiene el catálogo que indica a qué SUN pertenece cada municipio
+
+--
+
+Para las sesiones 5 y 6 analizaremos los datos a nivel SUN
+
+Pueden pensar cada SUN como un área metropolitana compuesta por uno o varios municipios
+
+---
+
+# bind_rows()
+
+Una forma muy básica de unir bases es cuando dos bases tienen las mismas columnas
+
+En este caso, limpiamos las dos bases de población municipal y creamos dos data frame, *popdata1* y *popdata2*
+
+*bind_rows* simplemente apila las dos bases
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata <- bind_rows(popdata1,popdata2)
+```
+
+---
+
+# Ejercicio 4
+
+Recuerden que les dije que las bases de población municiapal estaban desagregadas por sexo y grupo de edad
+
+En la siguiente parte del script, ¿cómo indicamos que queremos generar una sola fila por municipio que indique la población total municipal?
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata <- mundata %>% 
+  select(-c(renglon)) %>%
+  mutate(nom_ent=ifelse(clave_ent==20,"Oaxaca",nom_ent)) %>% 
+  group_by(clave, clave_ent, nom_ent, mun) %>% 
+  summarize(pop=sum(pob,na.rm=TRUE)) %>% 
+  arrange(clave) %>%
+  ungroup()
+
+```
+
+
+---
+
+# strc_c()
+
+Ubiquen las partes del script donde limpio la base *Recursos_Salud_2018.csv*
+
+Con *str_c()* concateno dos variables que son cadenas de texto (**cve_edo** y **cve_mun**)
+
+Mi propósito es crear dos bases, una para las UCI y otra para las camas de hospital, a nivel municipal, identificadas con la clave de INEGI
+
+En estas dos bases nuevas **clave** es el identificador municipal de INEGI
+
+---
+
+# left_join()
+
+Ya tengo data frame para las UCI (**icudata**) y otro para las camas (**bedsdata**)
+
+Ambos identifican a los municipios con la misma variable, **clave**
+
+Con *left_join()* uno las dos bases usando como criterio la variable **clave**
+
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+hospitaldata <- left_join(icudata, bedsdata, by="clave")
+```
+
+--
+
+El primer argumento de *left_joint()* puede pensarse como la base que mantienes fija
+
+El segundo arumento es la base que le vas a pegar a la que tienes fija, usando el tercer argumento, la variable que las identifica de manera única
+
+---
+
+# Base municipal
+
+Ya tenemos tres data frames por separado
+
+- *mundata*
+- *hospitalesdata*
+- *sundata*
+
+Cada fila corresponde a un municipio
+
+Basta unirlas usando la clave única de INEG, **clave**
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+mundata <- left_join(mundata,hospitaldata, by="clave")
+mundata <- left_join(mundata,sundata, by="clave")
+```
+
+--
+
+En cada unión voy a escribir sobre *mundata*, manteniendo fija *mundata* y pegándole primero *hospitaldata* y luego *sundata*
+
+---
+
+# Próxima sesión
+
+En la próxima sesión aprenderemos algunos elementos básicos de programación
+
+Esto nos ayudará a automatizar algunas tareas repetitivas que nos pueden causar errores
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**

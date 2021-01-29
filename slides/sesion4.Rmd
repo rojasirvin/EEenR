@@ -1,0 +1,232 @@
+---
+title: "Elementos básicos de programación en R"
+author: "Irvin Rojas"
+date: "30 de enero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 4. Elementos básicos de programación en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+
+Al final
+
+---
+
+# Funciones
+
+Las funciones tienen tres partes principales
+
+1. Nombre
+
+1. Argumentos: son los insumos de la función
+
+1. Cuerpo: son las operaciones que se desarrollarán
+
+
+---
+
+# Área de un círculo
+
+Sabemos que el área de cualquier círculo puede ser conocida si conocemos el radio $r$
+
+$$area=\pi r^2$$
+
+Vamos a crear una función para calcular el área
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+area_circ <- function(radio){
+  pi*radio^2
+}
+```
+
+--
+
+El nombre de nuestra función es area_circ, el único argumento es el radio y el cuerpo es la indicación de que, para cualquier radio, obtenga el producto de dicho radio al cuadrado por la constante $\pi$
+
+---
+
+# Área de un círculo
+
+Ponemos a funcionar la función
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+area_circ(radio=6)
+```
+--
+
+Noten que, como solo tenemos un argumento, resulta lo mismo ejecutar:
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+area_circ(6)
+```
+--
+
+Ahora definamos antes una constante y luego apliquemos la función a la constante
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+r <- 6
+area_circ(r)
+```
+
+---
+
+# Ejercicio 1
+
+1. Genere una función para calcular el área de un rectángulo
+
+1. Aplique su función para el caso de un rectángulo de base 6 y altura 4
+
+---
+
+# Números aleatorios
+
+R tiene un generador de números (semi) aleatorios
+
+Generamos un vector de 20 números aleatorios entre 0 y 100
+```{r include=T,echo=F,eval=T, results=F, message=F}
+set.seed(123)
+```
+```{r include=T,echo=T,eval=T, results=T, message=F}
+x <- runif(20,0,100)
+mean(x)
+```
+
+--
+
+¿Qué sucede si vuelven a correr el código que genera los números aleatorios?
+
+--
+
+Para arreglar este problema usamos *seed()*, lo que nos permite replicar la generación de números aleatorios
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+set.seed(123)
+x <- runif(20,0,100)
+mean(x)
+```
+
+---
+
+# Simulemos un data frame
+
+La función *rnorm()* nos permite obtener números aleatorios a partir de una distribución normal estándar
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+set.seed(123)
+
+datos <- tibble(
+  a = rnorm(100),
+  b = rnorm(100),
+  c = rnorm(100),
+  d = rnorm(100))
+```
+
+---
+
+# Normalizar una variable
+
+Supongamos que a cada columna (imaginemos que es una variable) queremos sacarle la media, dividirla por su desviación estándar y luego graficarla
+
+A esto se le llama *estandarizar* y la nueva variable es un *z-score*
+
+Esto es usado en psicología, economía, medicina, etc., para generar índices que tienen media cero y varianza uno
+
+Lo que no es buena idea hacer es repetir esto cuatro veces
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+media.a <- mean(datos$a)
+de.a <- sd(datos$a)
+
+datos.modificados <- datos %>% 
+  mutate(a=(a-media.a)/de.a)
+```
+
+Imaginen que tuvieran no cuatro sino 400 variables
+
+---
+
+# Funciones
+
+Podemos crear una función que haga los cálculos necesarios para estandarizar
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+estandarizar <- function(insumo1){
+  nuevo.dato <- (insumo1-mean(insumo1))/sd(insumo1)
+}
+```
+
+--
+
+Ahora, cada que a algo le apliquemos *estandarizar()*, nuestro procedimiento le hará lo mismo
+
+  
+```{r include=T,echo=T,eval=T, results=T, message=F}
+datos.estandarizados <- datos %>% 
+  mutate(a=estandarizar(a)) %>%
+  mutate(b=estandarizar(b)) %>% 
+  mutate(c=estandarizar(c)) %>% 
+  mutate(d=estandarizar(d))
+```
+
+---
+
+# Funciones
+
+Usen nombres intuitivos para sus funciones
+
+Usen reglas
+
+- 
+
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**

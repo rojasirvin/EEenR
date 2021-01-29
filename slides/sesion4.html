@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Elementos básicos de programación en R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Irvin Rojas" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+    <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide
+
+
+
+.title[
+# Sesión 4. Elementos básicos de programación en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas &lt;br&gt; [rojasirvin.com](https://www.rojasirvin.com/) &lt;br&gt; [&lt;i class="fab fa-github"&gt;&lt;/i&gt;](https://github.com/rojasirvin) [&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;](https://twitter.com/RojasIrvin) [&lt;i class="ai ai-google-scholar"&gt;&lt;/i&gt;](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&amp;hl=en)
+]
+
+---
+# Agenda
+
+Al final
+
+---
+
+# Funciones
+
+Las funciones tienen tres partes principales
+
+1. Nombre
+
+1. Argumentos: son los insumos de la función
+
+1. Cuerpo: son las operaciones que se desarrollarán
+
+
+---
+
+# Área de un círculo
+
+Sabemos que el área de cualquier círculo puede ser conocida si conocemos el radio `\(r\)`
+
+`$$area=\pi r^2$$`
+
+Vamos a crear una función para calcular el área
+
+
+```r
+area_circ &lt;- function(radio){
+  pi*radio^2
+}
+```
+
+--
+
+El nombre de nuestra función es area_circ, el único argumento es el radio y el cuerpo es la indicación de que, para cualquier radio, obtenga el producto de dicho radio al cuadrado por la constante `\(\pi\)`
+
+---
+
+# Área de un círculo
+
+Ponemos a funcionar la función
+
+
+```r
+area_circ(radio=6)
+```
+
+```
+## [1] 113.0973
+```
+--
+
+Noten que, como solo tenemos un argumento, resulta lo mismo ejecutar:
+
+
+```r
+area_circ(6)
+```
+
+```
+## [1] 113.0973
+```
+--
+
+Ahora definamos antes una constante y luego apliquemos la función a la constante
+
+
+```r
+r &lt;- 6
+area_circ(r)
+```
+
+```
+## [1] 113.0973
+```
+
+---
+
+# Ejercicio 1
+
+1. Genere una función para calcular el área de un rectángulo
+
+1. Aplique su función para el caso de un rectángulo de base 6 y altura 4
+
+---
+
+# Números aleatorios
+
+R tiene un generador de números (semi) aleatorios
+
+Generamos un vector de 20 números aleatorios entre 0 y 100
+
+
+```r
+x &lt;- runif(20,0,100)
+mean(x)
+```
+
+```
+## [1] 55.08084
+```
+
+--
+
+¿Qué sucede si vuelven a correr el código que genera los números aleatorios?
+
+--
+
+Para arreglar este problema usamos *seed()*, lo que nos permite replicar la generación de números aleatorios
+
+
+```r
+set.seed(123)
+x &lt;- runif(20,0,100)
+mean(x)
+```
+
+```
+## [1] 55.08084
+```
+
+---
+
+# Simulemos un data frame
+
+La función *rnorm()* nos permite obtener números aleatorios a partir de una distribución normal estándar
+
+
+```r
+set.seed(123)
+
+datos &lt;- tibble(
+  a = rnorm(100),
+  b = rnorm(100),
+  c = rnorm(100),
+  d = rnorm(100))
+```
+
+---
+
+# Normalizar una variable
+
+Supongamos que a cada columna (imaginemos que es una variable) queremos sacarle la media, dividirla por su desviación estándar y luego graficarla
+
+A esto se le llama *estandarizar* y la nueva variable es un *z-score*
+
+Esto es usado en psicología, economía, medicina, etc., para generar índices que tienen media cero y varianza uno
+
+Lo que no es buena idea hacer es repetir esto cuatro veces
+
+
+```r
+media.a &lt;- mean(datos$a)
+de.a &lt;- sd(datos$a)
+
+datos.modificados &lt;- datos %&gt;% 
+  mutate(a=(a-media.a)/de.a)
+```
+
+Imaginen que tuvieran no cuatro sino 400 variables
+
+---
+
+# Funciones
+
+Podemos crear una función que haga los cálculos necesarios para estandarizar
+
+
+
+```r
+estandarizar &lt;- function(insumo1){
+  nuevo.dato &lt;- (insumo1-mean(insumo1))/sd(insumo1)
+}
+```
+
+--
+
+Ahora, cada que a algo le apliquemos *estandarizar()*, nuestro procedimiento le hará lo mismo
+
+  
+
+```r
+datos.estandarizados &lt;- datos %&gt;% 
+  mutate(a=estandarizar(a)) %&gt;%
+  mutate(b=estandarizar(b)) %&gt;% 
+  mutate(c=estandarizar(c)) %&gt;% 
+  mutate(d=estandarizar(d))
+```
+
+---
+
+# Funciones
+
+Usen nombres intuitivos para sus funciones
+
+Usen reglas
+
+- 
+
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="libs/cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
