@@ -1,0 +1,125 @@
+---
+title: "Elementos intermedios de programación en R"
+author: "Irvin Rojas"
+date: "6 de febrero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 7. Elementos intermedios de programación en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+
+Al final
+
+---
+
+class: inverse, middle, center
+
+# Ejecución condicional
+
+---
+
+# Ejecución condicional
+
+Frecuentemente querremos ejecutar una función o realizar un procedimiento si ciertas condiciones se cumplen
+
+Necesitamos aprender algunas formas de condicionar las tareas
+
+---
+
+# if y else
+
+Dado un vector *x*, si el promedio de las entradas es mayor que 5, generar un objeto llamado *resultado* que tome como valor la palabra *alto*. Si el promedio es igual o menor que 5, que *resultado* diga *bajo*
+  
+```{r include=T,echo=T,eval=T, results=T, message=F}
+
+x <- c(3,4,1,0,2,0)
+
+evaluacion <- function(prueba) {
+  media <- mean(prueba)
+  
+  if(media > 5) {
+    print("alto")
+  } else {
+    print("bajo")
+  }
+}
+
+resultado <- evaluacion(x)
+```
+---
+
+# for
+
+Cuando hacemos simulaciones es común querer repetir tareas de acuerdo al valor que toma una variable o algún otro
+
+ 
+```{r include=T,echo=T,eval=T, results=T, message=F}
+
+x <- c(3,4,1,0,2,0)
+
+evaluacion <- function(prueba) {
+  media <- mean(prueba)
+  
+  if(media > 5) {
+    print("alto")
+  } else {
+    print("bajo")
+  }
+}
+
+resultado <- evaluacion(x)
+```
+---
+
+# Próxima clase
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
