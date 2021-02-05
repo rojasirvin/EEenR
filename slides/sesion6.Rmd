@@ -1,0 +1,494 @@
+---
+title: "Principios de gráficas en R"
+author: "Irvin Rojas"
+date: "5 de febrero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 6. Principios de gráficas en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+
+1. Aprenderemos a hacer gráficas básicas para variables categóricas y continuas
+
+1. Aplicaremos el uso de pipas para coleccionar instrucciones y crear gráficas
+
+1. Aprenderemos a dar formato para tener gráficas presentables para trabajos e investigaciones
+
+---
+
+class: inverse, middle, center
+
+# ggplot2
+
+---
+
+# ggplot2
+
+Usaremos el paquete *ggplot2*, integrante del *tidyverse*
+
+Pueden ver la documentación, ejemplos, los acordeones y otras cosas [acá](https://ggplot2.tidyverse.org/)
+
+--
+
+Es un paquete específicamente para hacer gráficas
+
+---
+
+# Gráfico de puntos
+
+Cuando instalamos *tidyverse* también instalamos algunas bases de datos de juguete que usaremos para explicar las funciones de *ggplot2*
+
+La base *mpg* tiene datos de modelos de autos fabricados entre 1999 y 2008
+
+Nos interesa conocer la relación entre *disply* (una medida del tamaño del motor en litros) u *hwy* (la eficiencia en millas por galón)
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "20%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy))
+```
+---
+
+# Sintaxis
+
+```{r include=T,echo=T,eval=F, results=F, message=F,out.width = "20%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy))
+```
+
+Tenemos que alimentar dos cosas básicas
+
+*geom_point()* indica cómo vamos a representar las variables gráficamente
+
+- La base de datos
+
+- aes(): indica cómo mapear variables en forma gráfica
+
+---
+
+# Marcadores
+
+Controlamos el color de los puntos
+
+```{r include=T,echo=T,eval=F, results=F, message=F,out.width = "20%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy),
+             color="red")
+```
+
+--
+
+... y el tamaño
+
+```{r include=T,echo=T,eval=F, results=F, message=F,out.width = "20%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy),
+             color="red")
+```
+
+---
+
+# Suavizador
+
+Veremos con detalle el asunto de los estimadores no paramétricos
+
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "35%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_smooth(aes(x=displ, y=hwy))
+```
+
+---
+
+# aes()
+
+Basta especificar *aes()* una sola vez
+
+Podemos combinar gráficos, por ejemplo, puntos y suavizador
+
+
+---
+
+# Facetas
+
+.pull-left[
+
+Las facetas nos permiten hacer el mismo gráfico para cada uno de los valores de una variable categórica
+
+La variable **class** indica el tipo de auto
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(mpg,aes(x=displ, y=hwy))+
+  geom_point(color="red")+
+  facet_wrap(~ class, ncol=3)
+
+```
+]
+
+---
+
+# Gráfica de barras
+
+.pull-left[
+Un tipo muy popular de gráficas para variables categóricas
+
+Nos muestra el conteo de observaciones en una categoría
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_bar(aes(x=class))
+
+```
+]
+
+---
+
+# Gráfica de barras
+
+.pull-left[
+Quizás es más útil graficar la proporción
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_bar(aes(x=class, y=stat(prop),group=1))
+```
+]
+
+---
+# Gráfica de barras
+
+.pull-left[
+Usamos la opción *fill* dentro de *aes()*
+
+Indicamos que llene cada barra con un color diferent, de acuerdo a la misma variable **class**
+
+¿Qué pasa si indicamos *fill* dependiente de otra variable?
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(data=mpg)+
+  geom_bar(aes(x=class,fill=class))
+
+```
+]
+
+---
+
+# Gráfica de caja
+
+.pull-left[
+Nos permite visualizar la dispersión de los datos por categorías
+
+Podemos ver la ayuda o podemos recurrir al sitio de [*ggplot2*](https://ggplot2.tidyverse.org/reference/geom_boxplot.html) para aprender más sobre lo que representan las cajas
+
+- Los límites de la caja muestran los percentiles 25 y 75
+
+- Los límites de las líneas muestran $1.5*IQR$
+
+- Los puntos son las observaciones que se salen del rango especificado por las líneas
+
+
+El IQR (rango intercuartil) es la diferencia entre los percentiles 25 y 75
+
+
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(mpg,) + 
+  geom_boxplot(aes(class,hwy))
+```
+]
+
+---
+
+
+# Gráfica de caja
+
+.pull-left[
+Puede ser de utilidad rotar los ejes
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(mpg,) + 
+  geom_boxplot(aes(class,hwy))+
+  coord_flip()
+```
+]
+
+---
+
+class: inverse, middle, center
+
+# Usar la estética para representar dimensiones
+
+---
+
+# Estética
+
+.pull-left[
+Podemos usar colores, tipos de línea, grupos de líneas, entre otros, para incorporar en el gráfico otras dimensiones de los datos
+
+En el gráfico de puntos básico, podemos representar cada fabricante con un color
+
+Tenemos un nuevo argumento dentro de *aes()*, que controla el color con base en la variable **manufacturer*
+]
+
+.pull-right[
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center'}
+ggplot(mpg)+
+  geom_point(aes(x=displ,
+                         y=hwy,
+                         color=manufacturer))
+
+```
+]
+
+---
+
+# Ejercicio 1
+
+Hagan un gráfico de puntos que ponga de color diferente a los autos de fabricantes asiáticos
+
+Los fabricantes asiáticos son Honda, Hyndai, Nissan, Subaru y Toyota
+
+---
+
+# Estética
+
+Otras cosas que podemos controlar son
+
+- La forma de los marcadores
+
+- El tamaño de los marcadores
+
+- La intensidad del color de los marcadores
+
+---
+
+# Ejercicio 2
+
+Haga un gráfico donde represente a los fabricantes asiáticos con distintos colores y formas de marcador
+
+
+---
+
+# Variables continuas
+
+.pull-left[
+Usemos ahora la base de Star Wars para mostrar algunos gráficos con variables continuas
+
+La variable **height* indica la estatura de una colección de personajes
+
+<img class="aligncenter" src="https://media.giphy.com/media/3ohuAxV0DfcLTxVh6w/giphy.gif" alt="The 25 best <em>Star Wars</em> GIFs in the galaxy" scale="0">
+
+]
+
+.pull-right[
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", warning=F, fig.align = 'center'}
+ggplot(starwars)+
+  geom_histogram(aes(height))
+
+```
+
+]
+
+---
+
+# Variables continuas
+
+.pull-left[
+Con bindwidth se controla el tamaño de cada barra
+
+Cuando estudiemos métodos no paramétricos comprenderemos esto con detalle
+]
+
+.pull-right[
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", warning=F, fig.align = 'center'}
+ggplot(starwars)+
+  geom_histogram(aes(height), binwidth = 1)
+
+```
+
+]
+
+---
+
+# Variables continuas
+
+.pull-left[
+Un gráfico más estilizado usa líneas en vez de barras para representar lo mismo
+]
+
+.pull-right[
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", warning=F, fig.align = 'center'}
+ggplot(starwars)+
+  geom_freqpoly(aes(height), binwidth = 5)
+```
+
+]
+
+---
+
+# Ejercicio 3
+
+¿Podemos sobreponer los gráficos del histograma de barras y su versión estilizada con líneas?
+
+
+---
+
+# Estética
+
+.pull-left[
+Ya sabemos que podemos usar la estética para agregar una dimensión de análisis
+]
+
+.pull-right[
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", warning=F, fig.align = 'center'}
+ggplot(starwars)+
+  geom_freqpoly(aes(height, color=gender),
+                binwidth = 20)
+```
+
+]
+
+---
+
+class: inverse, middle, center
+
+# Formato
+
+---
+
+# Formato
+
+Las gráficas deben comunicar ideas casi sin tener que leer el resto del texto
+
+Deben ser fáciles de leer
+
+Deben tener apropiadamente nombres de los ejes
+
+Deben indicar qué significa cada color o cada estilo de línea
+
+--
+
+Usaremos una base que tiene el registro de los vuelos de entrada a y salida desde la ciudad de Nueva York
+
+Nos quedamos con una muestra de dichos vuelos dado que son más de 300,000 registros
+
+La función *slice_sample()* corta una *rebanada* de los datos de manera aleatoria (especificamos que queremos el 1% de los datos)
+
+```{r include=T,echo=T,eval=T, results=T, message=F,out.width = "75%", warning=F, fig.align = 'center'}
+library(nycflights13)
+
+flights2 <- slice_sample(flights, prop=.01)
+```
+
+
+---
+
+# El inicio y el final
+
+
+.pull-left[
+Empezaremos así:
+```{r include=T,echo=F,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center', warning=F}
+flights2 %>% 
+  ggplot(aes(dep_delay, distance/air_time*60)) +
+  geom_point(alpha = 1 / 3) +
+  xlab("Retraso (minutos)") +
+  ylab("Velocidad (millas/hora)")
+```
+]
+
+.pull-right[
+Para terminar así:
+```{r include=T,echo=F,eval=T, results=T, message=F,out.width = "75%", fig.align = 'center', warning=F}
+flights2 %>% 
+  ggplot(aes(dep_delay, distance/air_time*60, colour=carrier)) +
+  geom_point(alpha = 1 / 3) +
+  xlab("Retraso (minutos)") +
+  ylab("Velocidad (millas/hora)")+
+  geom_hline(aes(yintercept=300), color="black", linetype="dashed")+
+  geom_vline(aes(xintercept=250), color="black", linetype="dotted")+
+  labs(colour="Aerolínea",
+       title="Relación entre retraso de vuelos y velocidad",
+       subtitle="Aeropuerto de Nueva York",
+       caption="Se incluye una muestra de 5%\npara facilitar la visualización")+
+  theme(legend.position="bottom")+
+  guides(colour=guide_legend(nrow=2))
+  
+```
+]
+
+---
+
+# Próxima sesión
+
+Aprenderemos a hacer gráficas de otros tipos, con datos más reales
+
+Conjuntaremos lo que ya sabemos de programación para eficientar las tareas de hacer gráficas uniendo bases de datos y creando nuevas variables
+
+
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**

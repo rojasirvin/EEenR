@@ -20,3 +20,7 @@ Aquí podrán encontrar las diapositivas del curso.
 [Sesión 3](https://rojasirvin.github.io/EEenR/slides/sesion3.html#1). Bases de datos en R
 
 [Sesión 4](https://rojasirvin.github.io/EEenR/slides/sesion4.html#1). Elementos básicos de programación en R
+
+[Sesión 5](https://rojasirvin.github.io/EEenR/slides/sesion5.html#1). Estadística descriptiva R
+
+[Sesión 6](https://rojasirvin.github.io/EEenR/slides/sesion6.html#1). Principios de gráficas en R

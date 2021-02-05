@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Elementos básicos de programación en R</title>
+    <title>Estadística descriptiva en R</title>
     <meta charset="utf-8" />
     <meta name="author" content="Irvin Rojas" />
     <script src="libs/header-attrs-2.5/header-attrs.js"></script>
@@ -9,7 +9,7 @@
     <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
     <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
     <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
-    <link rel="stylesheet" href="libs/cide_titulo_largo.css" type="text/css" />
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
     <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
@@ -23,7 +23,7 @@ class: title-slide
 
 
 .title[
-# Sesión 4. Elementos básicos de programación en R
+# Sesión 5. Estadística descriptiva R
 ]
 
 .subtitle[
@@ -37,204 +37,225 @@ class: title-slide
 ---
 # Agenda
 
-1. Aprenderemos las estructuras de las funciones
+1. Aprenderemos a calcular estadística descriptiva básica
 
-1. Aprenderemos a generar números aleatorios
+1. Aprenderemos a calcular estas estadísticas por grupos
 
-1. Aprenderemos a programar funciones básicas
-
----
-
-# Funciones
-
-Las funciones tienen tres partes principales
-
-1. Nombre
-
-1. Argumentos: son los insumos de la función
-
-1. Cuerpo: son las operaciones que se desarrollarán
-
+1. Aprenderemos a crear tablas de estadística descriptiva
 
 ---
 
-# Área de un círculo
+# Estadística descriptiva
 
-Sabemos que el área de cualquier círculo puede ser conocida si conocemos el radio `\(r\)`
+Les recomiendo que siempre describan sus datos
 
-`$$area=\pi r^2$$`
+Es importante porque les ayuda a detectar patrones antes de dedicarse a hacer cosas más complejas
 
-Vamos a crear una función para calcular el área
+Ayuda a identificar posibles errores
+
+¿Qué pasaría si nos damos cuenta que en nuestra base *mundata* hay un munocipio con -10 hospitales?
+
+
+---
+
+# Vean sus datos
+
+En sesiones anteriores usamos
 
 
 ```r
-area_circ &lt;- function(radio){
-  pi*radio^2
-}
+head(mundata)
+head(mundata, n=10)
+tail(mundata)
+dim(mundata)
+nrow(mundata)
+ncol(mundata)
+```
+
+
+
+
+---
+
+# mean()
+
+La media aritmética
+
+
+```
+## [1] NA
+```
+
+¿Por qué pasó esto? ¿Cómo lo resolverían?
+
+--
+
+
+```
+## [1] 53.1148
+```
+
+Noten que se valen los atajos *T* en lugar de *TRUE* y *F* en lugar de *FALSE*
+
+Noten el uso del símbolo "$"
+
+---
+
+# sd()
+
+La desviación estándar
+
+
+```
+## [1] 269.638
 ```
 
 --
 
-El nombre de nuestra función es area_circ, el único argumento es el radio y el cuerpo es la indicación de que, para cualquier radio, obtenga el producto de dicho radio al cuadrado por la constante `\(\pi\)`
+Ya saben qué hacer cuando quieren asignarle el cálculo a un ofjeto
+
+
+```
+## [1] 269.638
+```
 
 ---
 
-# Área de un círculo
+# aggregate()
 
-Ponemos a funcionar la función
+Podemos calcular estadística por grupos
 
 
 ```r
-area_circ(radio=6)
+aggregate(mundata$beds,
+          by=list(Estado=mundata$nom_ent),
+          mean)
 ```
 
-```
-## [1] 113.0973
-```
+
 --
 
-Noten que, como solo tenemos un argumento, resulta lo mismo ejecutar:
+Si quisiéramos guardar esta tabla en un data frame
 
 
 ```r
-area_circ(6)
-```
-
-```
-## [1] 113.0973
-```
---
-
-Ahora definamos antes una constante y luego apliquemos la función a la constante
-
-
-```r
-r &lt;- 6
-area_circ(r)
-```
-
-```
-## [1] 113.0973
-```
-
----
-
-# Ejercicio 1
-
-1. Genere una función para calcular el área de un rectángulo
-
-1. Aplique su función para el caso de un rectángulo de base 6 y altura 4
-
----
-
-# Números aleatorios
-
-R tiene un generador de números (semi) aleatorios
-
-Generamos un vector de 20 números aleatorios entre 0 y 100
-
-
-```r
-x &lt;- runif(20,0,100)
-mean(x)
-```
-
-```
-## [1] 55.08084
+mean.camas.mun &lt;- aggregate(mundata$beds,
+          by=list(Estado=mundata$nom_ent),
+          mean)
 ```
 
 --
 
-¿Qué sucede si vuelven a correr el código que genera los números aleatorios?
+¿Qué pasó? ¿Cómo lo solucionamos?
 
---
 
-Para arreglar este problema usamos *seed()*, lo que nos permite replicar la generación de números aleatorios
+---
+
+# subset()
+
+Otra forma de quedarnos solo con una parte de los datos es con la opción *subset()*
+
+Recuerden que antes usamos *filter()* y *select()* con resultados parecidos
 
 
 ```r
-set.seed(123)
-x &lt;- runif(20,0,100)
-mean(x)
-```
+mundata.baja &lt;- subset(mundata,
+                  nom_ent==c("Baja California","Baja California Sur"),
+                  select=c(nom_ent,mun, pop, beds, icu))
 
-```
-## [1] 55.08084
+
+mean.camas.baja &lt;- aggregate(mundata.baja$beds,
+                             by=list(Estado=mundata.baja$nom_ent),
+                             mean,
+                             na.rm=T)
 ```
 
 ---
 
-# Simulemos un data frame
+class: inverse, middle, center
 
-La función *rnorm()* nos permite obtener números aleatorios a partir de una distribución normal estándar
+# Recordatorio de las pipas
 
 
-```r
-set.seed(123)
+---
 
-datos &lt;- tibble(
-  a = rnorm(100),
-  b = rnorm(100),
-  c = rnorm(100),
-  d = rnorm(100))
+# Pipas para estadística descriptiva
+
+Se irán dando cuenta que hay varias formas de hacer lo mismo (calcular una media, por ejemplo)
+
+Las pipas nos ayudan a crear código que es mucho más fácil de leer
+
+No tenemos que crear objetos intermedios
+
+Las pipas nos son útiles en el cálculo de estadística descriptiva, sobre todo cuando las acompañamos de *group_by*
+
+
+
+```
+## # A tibble: 2 x 2
+##   nom_ent             media.camas
+##   &lt;chr&gt;                     &lt;dbl&gt;
+## 1 Baja California           1645 
+## 2 Baja California Sur        158.
 ```
 
 ---
 
-# Normalizar una variable
+# Más de una estadística
 
-Supongamos que a cada columna (imaginemos que es una variable) queremos sacarle la media, dividirla por su desviación estándar y luego graficarla
-
-A esto se le llama *estandarizar* y la nueva variable es un *z-score*
-
-Esto es usado en psicología, economía, medicina, etc., para generar índices que tienen media cero y varianza uno
-
-Lo que no es buena idea hacer es repetir esto cuatro veces
+En su investigación y en sus trabajos académicos muy frecuentemente presentarán tablas de estadística descriptiva
 
 
-```r
-media.a &lt;- mean(datos$a)
-de.a &lt;- sd(datos$a)
-
-datos.modificados &lt;- datos %&gt;% 
-  mutate(a=(a-media.a)/de.a)
 ```
-
-Imaginen que tuvieran no cuatro sino 400 variables
+## # A tibble: 2 x 6
+##   nom_ent             media.camas de.camas max.camas min.camas obs.camas
+##   &lt;chr&gt;                     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;int&gt;
+## 1 Baja California           1645      769.      2189      1101         2
+## 2 Baja California Sur        158.     122.       244        71         2
+```
 
 ---
 
-# Funciones
+# Agregación a distintos niveles
 
-Podemos crear una función que haga los cálculos necesarios para estandarizar
+Con nuestra base municipal, podemos usar las claves de estado y de ciudad (SUN) para agregar datos a distintos niveles
 
+Por ejemplo, datos a nivel SUN
+
+
+```r
+sundata &lt;- mundata %&gt;% 
+  filter(!is.na(cve_sun)) %&gt;% 
+  group_by(cve_sun, nom_sun) %&gt;% 
+  summarise(pop=sum(pop,na.rm=TRUE),
+            beds=sum(beds,na.rm=TRUE),
+            icu=sum(icu,na.rm=TRUE)) %&gt;% 
+  ungroup()
+```
+
+---
+
+# Agregación a distintos niveles
+
+Y para nivel estatal
 
 
 ```r
-estandarizar &lt;- function(insumo1){
-  nuevo.dato &lt;- (insumo1-mean(insumo1))/sd(insumo1)
-}
+statedata &lt;- mundata %&gt;% 
+  group_by(clave_ent, nom_ent) %&gt;% 
+  summarise(pop=sum(pop,na.rm=TRUE),
+            beds=sum(beds,na.rm=TRUE),
+            icu=sum(icu,na.rm=TRUE)) %&gt;% 
+  arrange(clave_ent) %&gt;%
+  ungroup() 
 ```
 
---
-
-Ahora, cada que a algo le apliquemos *estandarizar()*, nuestro procedimiento le hará lo mismo
-
-  
-
-```r
-datos.estandarizados &lt;- datos %&gt;% 
-  mutate(a=estandarizar(a)) %&gt;%
-  mutate(b=estandarizar(b)) %&gt;% 
-  mutate(c=estandarizar(c)) %&gt;% 
-  mutate(d=estandarizar(d))
-```
 
 ---
 
 # Próxima sesión
 
-Aprenderemos a hacer estadística descriptiva
+Aprenderemos a hacer gráficas de varios tipos
 
 ---
 

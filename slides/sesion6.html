@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Principios de gráficas en R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Irvin Rojas" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+    <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide
+
+
+
+.title[
+# Sesión 6. Principios de gráficas en R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas &lt;br&gt; [rojasirvin.com](https://www.rojasirvin.com/) &lt;br&gt; [&lt;i class="fab fa-github"&gt;&lt;/i&gt;](https://github.com/rojasirvin) [&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;](https://twitter.com/RojasIrvin) [&lt;i class="ai ai-google-scholar"&gt;&lt;/i&gt;](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&amp;hl=en)
+]
+
+---
+# Agenda
+
+1. Aprenderemos a hacer gráficas básicas para variables categóricas y continuas
+
+1. Aplicaremos el uso de pipas para coleccionar instrucciones y crear gráficas
+
+1. Aprenderemos a dar formato para tener gráficas presentables para trabajos e investigaciones
+
+---
+
+class: inverse, middle, center
+
+# ggplot2
+
+---
+
+# ggplot2
+
+Usaremos el paquete *ggplot2*, integrante del *tidyverse*
+
+Pueden ver la documentación, ejemplos, los acordeones y otras cosas [acá](https://ggplot2.tidyverse.org/)
+
+--
+
+Es un paquete específicamente para hacer gráficas
+
+---
+
+# Gráfico de puntos
+
+Cuando instalamos *tidyverse* también instalamos algunas bases de datos de juguete que usaremos para explicar las funciones de *ggplot2*
+
+La base *mpg* tiene datos de modelos de autos fabricados entre 1999 y 2008
+
+Nos interesa conocer la relación entre *disply* (una medida del tamaño del motor en litros) u *hwy* (la eficiencia en millas por galón)
+
+
+```r
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy))
+```
+
+&lt;img src="figures/unnamed-chunk-1-1.png" width="20%" style="display: block; margin: auto;" /&gt;
+---
+
+# Sintaxis
+
+
+```r
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy))
+```
+
+Tenemos que alimentar dos cosas básicas
+
+*geom_point()* indica cómo vamos a representar las variables gráficamente
+
+- La base de datos
+
+- aes(): indica cómo mapear variables en forma gráfica
+
+---
+
+# Marcadores
+
+Controlamos el color de los puntos
+
+
+```r
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy),
+             color="red")
+```
+
+--
+
+... y el tamaño
+
+
+```r
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ, y=hwy),
+             color="red")
+```
+
+---
+
+# Suavizador
+
+Veremos con detalle el asunto de los estimadores no paramétricos
+
+
+
+```r
+ggplot(data=mpg)+
+  geom_smooth(aes(x=displ, y=hwy))
+```
+
+&lt;img src="figures/unnamed-chunk-5-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# aes()
+
+Basta especificar *aes()* una sola vez
+
+Podemos combinar gráficos, por ejemplo, puntos y suavizador
+
+
+---
+
+# Facetas
+
+.pull-left[
+
+Las facetas nos permiten hacer el mismo gráfico para cada uno de los valores de una variable categórica
+
+La variable **class** indica el tipo de auto
+]
+
+.pull-right[
+
+```r
+ggplot(mpg,aes(x=displ, y=hwy))+
+  geom_point(color="red")+
+  facet_wrap(~ class, ncol=3)
+```
+
+&lt;img src="figures/unnamed-chunk-6-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Gráfica de barras
+
+.pull-left[
+Un tipo muy popular de gráficas para variables categóricas
+
+Nos muestra el conteo de observaciones en una categoría
+]
+
+.pull-right[
+
+```r
+ggplot(data=mpg)+
+  geom_bar(aes(x=class))
+```
+
+&lt;img src="figures/unnamed-chunk-7-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Gráfica de barras
+
+.pull-left[
+Quizás es más útil graficar la proporción
+]
+
+.pull-right[
+
+```r
+ggplot(data=mpg)+
+  geom_bar(aes(x=class, y=stat(prop),group=1))
+```
+
+&lt;img src="figures/unnamed-chunk-8-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Gráfica de barras
+
+.pull-left[
+Usamos la opción *fill* dentro de *aes()*
+
+Indicamos que llene cada barra con un color diferent, de acuerdo a la misma variable **class**
+
+¿Qué pasa si indicamos *fill* dependiente de otra variable?
+]
+
+.pull-right[
+
+```r
+ggplot(data=mpg)+
+  geom_bar(aes(x=class,fill=class))
+```
+
+&lt;img src="figures/unnamed-chunk-9-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Gráfica de caja
+
+.pull-left[
+Nos permite visualizar la dispersión de los datos por categorías
+
+Podemos ver la ayuda o podemos recurrir al sitio de [*ggplot2*](https://ggplot2.tidyverse.org/reference/geom_boxplot.html) para aprender más sobre lo que representan las cajas
+
+- Los límites de la caja muestran los percentiles 25 y 75
+
+- Los límites de las líneas muestran `\(1.5*IQR\)`
+
+- Los puntos son las observaciones que se salen del rango especificado por las líneas
+
+
+El IQR (rango intercuartil) es la diferencia entre los percentiles 25 y 75
+
+
+]
+
+.pull-right[
+
+```r
+ggplot(mpg,) + 
+  geom_boxplot(aes(class,hwy))
+```
+
+&lt;img src="figures/unnamed-chunk-10-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+
+# Gráfica de caja
+
+.pull-left[
+Puede ser de utilidad rotar los ejes
+]
+
+.pull-right[
+
+```r
+ggplot(mpg,) + 
+  geom_boxplot(aes(class,hwy))+
+  coord_flip()
+```
+
+&lt;img src="figures/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+class: inverse, middle, center
+
+# Usar la estética para representar dimensiones
+
+---
+
+# Estética
+
+.pull-left[
+Podemos usar colores, tipos de línea, grupos de líneas, entre otros, para incorporar en el gráfico otras dimensiones de los datos
+
+En el gráfico de puntos básico, podemos representar cada fabricante con un color
+
+Tenemos un nuevo argumento dentro de *aes()*, que controla el color con base en la variable **manufacturer*
+]
+
+.pull-right[
+
+```r
+ggplot(mpg)+
+  geom_point(aes(x=displ,
+                         y=hwy,
+                         color=manufacturer))
+```
+
+&lt;img src="figures/unnamed-chunk-12-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Ejercicio 1
+
+Hagan un gráfico de puntos que ponga de color diferente a los autos de fabricantes asiáticos
+
+Los fabricantes asiáticos son Honda, Hyndai, Nissan, Subaru y Toyota
+
+---
+
+# Estética
+
+Otras cosas que podemos controlar son
+
+- La forma de los marcadores
+
+- El tamaño de los marcadores
+
+- La intensidad del color de los marcadores
+
+---
+
+# Ejercicio 2
+
+Haga un gráfico donde represente a los fabricantes asiáticos con distintos colores y formas de marcador
+
+
+---
+
+# Variables continuas
+
+.pull-left[
+Usemos ahora la base de Star Wars para mostrar algunos gráficos con variables continuas
+
+La variable **height* indica la estatura de una colección de personajes
+
+&lt;img class="aligncenter" src="https://media.giphy.com/media/3ohuAxV0DfcLTxVh6w/giphy.gif" alt="The 25 best &lt;em&gt;Star Wars&lt;/em&gt; GIFs in the galaxy" scale="0"&gt;
+
+]
+
+.pull-right[
+
+
+```r
+ggplot(starwars)+
+  geom_histogram(aes(height))
+```
+
+&lt;img src="figures/unnamed-chunk-13-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Variables continuas
+
+.pull-left[
+Con bindwidth se controla el tamaño de cada barra
+
+Cuando estudiemos métodos no paramétricos comprenderemos esto con detalle
+]
+
+.pull-right[
+
+
+```r
+ggplot(starwars)+
+  geom_histogram(aes(height), binwidth = 1)
+```
+
+&lt;img src="figures/unnamed-chunk-14-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Variables continuas
+
+.pull-left[
+Un gráfico más estilizado usa líneas en vez de barras para representar lo mismo
+]
+
+.pull-right[
+
+
+```r
+ggplot(starwars)+
+  geom_freqpoly(aes(height), binwidth = 5)
+```
+
+&lt;img src="figures/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Ejercicio 3
+
+¿Podemos sobreponer los gráficos del histograma de barras y su versión estilizada con líneas?
+
+
+---
+
+# Estética
+
+.pull-left[
+Ya sabemos que podemos usar la estética para agregar una dimensión de análisis
+]
+
+.pull-right[
+
+
+```r
+ggplot(starwars)+
+  geom_freqpoly(aes(height, color=gender),
+                binwidth = 20)
+```
+
+&lt;img src="figures/unnamed-chunk-16-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: inverse, middle, center
+
+# Formato
+
+---
+
+# Formato
+
+Las gráficas deben comunicar ideas casi sin tener que leer el resto del texto
+
+Deben ser fáciles de leer
+
+Deben tener apropiadamente nombres de los ejes
+
+Deben indicar qué significa cada color o cada estilo de línea
+
+--
+
+Usaremos una base que tiene el registro de los vuelos de entrada a y salida desde la ciudad de Nueva York
+
+Nos quedamos con una muestra de dichos vuelos dado que son más de 300,000 registros
+
+La función *slice_sample()* corta una *rebanada* de los datos de manera aleatoria (especificamos que queremos el 1% de los datos)
+
+
+```r
+library(nycflights13)
+
+flights2 &lt;- slice_sample(flights, prop=.01)
+```
+
+
+---
+
+# El inicio y el final
+
+
+.pull-left[
+Empezaremos así:
+&lt;img src="figures/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+Para terminar así:
+&lt;img src="figures/unnamed-chunk-19-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Próxima sesión
+
+Aprenderemos a hacer gráficas de otros tipos, con datos más reales
+
+Conjuntaremos lo que ya sabemos de programación para eficientar las tareas de hacer gráficas uniendo bases de datos y creando nuevas variables
+
+
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="libs/cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

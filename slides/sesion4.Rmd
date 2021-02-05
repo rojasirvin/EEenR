@@ -7,7 +7,7 @@ header-includes:
   - \usetikzlibrary{shapes, shadows,arrows}
 output:
   xaringan::moon_reader:
-    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    css: [default, "libs/cide_titulo_largo.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
     seal: false
     chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
     lib_dir: libs

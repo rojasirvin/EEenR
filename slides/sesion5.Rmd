@@ -1,0 +1,286 @@
+---
+title: "Estadística descriptiva en R"
+author: "Irvin Rojas"
+date: "5 de febrero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 5. Estadística descriptiva R
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+
+1. Aprenderemos a calcular estadística descriptiva básica
+
+1. Aprenderemos a calcular estas estadísticas por grupos
+
+1. Aprenderemos a crear tablas de estadística descriptiva
+
+---
+
+# Estadística descriptiva
+
+Les recomiendo que siempre describan sus datos
+
+Es importante porque les ayuda a detectar patrones antes de dedicarse a hacer cosas más complejas
+
+Ayuda a identificar posibles errores
+
+¿Qué pasaría si nos damos cuenta que en nuestra base *mundata* hay un munocipio con -10 hospitales?
+
+
+---
+
+# Vean sus datos
+
+En sesiones anteriores usamos
+
+```{r include=T,echo=T,eval=F, results=F}
+head(mundata)
+head(mundata, n=10)
+tail(mundata)
+dim(mundata)
+nrow(mundata)
+ncol(mundata)
+```
+
+
+```{r include=F,echo=F,eval=T, results=F, message=F}
+setwd("C:/Users/Irvin/Dropbox/Ejercicios en R/datos/")
+
+mundata <- read_csv(file = "./mundata.csv",
+                    locale = locale(encoding = "latin1"))
+```
+
+---
+
+# mean()
+
+La media aritmética
+
+```{r include=T,echo=F,eval=T, results=T, message=F}
+mean(mundata$beds)
+```
+
+¿Por qué pasó esto? ¿Cómo lo resolverían?
+
+--
+
+```{r include=T,echo=F,eval=T, results=T, message=F}
+mean(mundata$beds, na.rm=T)
+```
+
+Noten que se valen los atajos *T* en lugar de *TRUE* y *F* en lugar de *FALSE*
+
+Noten el uso del símbolo "$"
+
+---
+
+# sd()
+
+La desviación estándar
+
+```{r include=T,echo=F,eval=T, results=T, message=F}
+sd(mundata$beds, na.rm=T)
+```
+
+--
+
+Ya saben qué hacer cuando quieren asignarle el cálculo a un ofjeto
+
+```{r include=T,echo=F,eval=T, results=T, message=F}
+sd.camas <- sd(mundata$beds, na.rm=T)
+
+sd.camas
+```
+
+---
+
+# aggregate()
+
+Podemos calcular estadística por grupos
+
+```{r include=T,echo=T,eval=F, results=F, message=F}
+aggregate(mundata$beds,
+          by=list(Estado=mundata$nom_ent),
+          mean)
+```
+
+
+--
+
+Si quisiéramos guardar esta tabla en un data frame
+
+```{r include=T,echo=T,eval=T, results=T, message=F}
+mean.camas.mun <- aggregate(mundata$beds,
+          by=list(Estado=mundata$nom_ent),
+          mean)
+```
+
+--
+
+¿Qué pasó? ¿Cómo lo solucionamos?
+
+
+---
+
+# subset()
+
+Otra forma de quedarnos solo con una parte de los datos es con la opción *subset()*
+
+Recuerden que antes usamos *filter()* y *select()* con resultados parecidos
+
+```{r include=T,echo=T,eval=F, results=F, message=F, warning=F}
+mundata.baja <- subset(mundata,
+                  nom_ent==c("Baja California","Baja California Sur"),
+                  select=c(nom_ent,mun, pop, beds, icu))
+
+
+mean.camas.baja <- aggregate(mundata.baja$beds,
+                             by=list(Estado=mundata.baja$nom_ent),
+                             mean,
+                             na.rm=T)
+
+
+```
+
+---
+
+class: inverse, middle, center
+
+# Recordatorio de las pipas
+
+
+---
+
+# Pipas para estadística descriptiva
+
+Se irán dando cuenta que hay varias formas de hacer lo mismo (calcular una media, por ejemplo)
+
+Las pipas nos ayudan a crear código que es mucho más fácil de leer
+
+No tenemos que crear objetos intermedios
+
+Las pipas nos son útiles en el cálculo de estadística descriptiva, sobre todo cuando las acompañamos de *group_by*
+
+
+```{r include=T,echo=F,eval=T, results=T, message=F, warning=F}
+subset(mundata,
+                       nom_ent==c("Baja California","Baja California Sur"),
+                       select=c(nom_ent,mun, pop, beds, icu)) %>% 
+  group_by(nom_ent) %>% 
+  summarise(media.camas=mean(beds)) %>% 
+  ungroup()
+
+```
+
+---
+
+# Más de una estadística
+
+En su investigación y en sus trabajos académicos muy frecuentemente presentarán tablas de estadística descriptiva
+
+```{r include=T,echo=F,eval=T, results=T, message=F, warning=F}
+tabla.desc <- subset(mundata,
+                       nom_ent==c("Baja California","Baja California Sur"),
+                       select=c(nom_ent,mun, pop, beds, icu)) %>% 
+  group_by(nom_ent) %>% 
+  summarise(media.camas=mean(beds),
+            de.camas=sd(beds),
+            max.camas=max(beds),
+            min.camas=min(beds),
+            obs.camas=n()) %>% 
+  ungroup()
+
+tabla.desc
+```
+
+---
+
+# Agregación a distintos niveles
+
+Con nuestra base municipal, podemos usar las claves de estado y de ciudad (SUN) para agregar datos a distintos niveles
+
+Por ejemplo, datos a nivel SUN
+
+```{r include=T,echo=T,eval=F, results=T, message=F}
+sundata <- mundata %>% 
+  filter(!is.na(cve_sun)) %>% 
+  group_by(cve_sun, nom_sun) %>% 
+  summarise(pop=sum(pop,na.rm=TRUE),
+            beds=sum(beds,na.rm=TRUE),
+            icu=sum(icu,na.rm=TRUE)) %>% 
+  ungroup()
+```
+
+---
+
+# Agregación a distintos niveles
+
+Y para nivel estatal
+
+```{r include=T,echo=T,eval=F, results=T, message=F}
+statedata <- mundata %>% 
+  group_by(clave_ent, nom_ent) %>% 
+  summarise(pop=sum(pop,na.rm=TRUE),
+            beds=sum(beds,na.rm=TRUE),
+            icu=sum(icu,na.rm=TRUE)) %>% 
+  arrange(clave_ent) %>%
+  ungroup() 
+```
+
+
+---
+
+# Próxima sesión
+
+Aprenderemos a hacer gráficas de varios tipos
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
