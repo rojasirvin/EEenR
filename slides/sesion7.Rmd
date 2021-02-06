@@ -7,7 +7,7 @@ header-includes:
   - \usetikzlibrary{shapes, shadows,arrows}
 output:
   xaringan::moon_reader:
-    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    css: [default, "libs/cide_titulo_largo.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
     seal: false
     chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
     lib_dir: libs
@@ -47,74 +47,83 @@ xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
 ---
 # Agenda
 
-Al final
+En esta sesión pondremos en práctica lo que hemos aprendido hasta ahora
+
+Usaremos datos para construir variables
+
+Generaremos gráficas más complicadas que las de la clase anterior
 
 ---
 
+# Ejercicio 1
+
+1. Parta de la base *mundata.csv*
+
+1. Construya un objeto llamado *sundata* que agregue las características a nivel SUN
+
+1. Descarte la SUN "Colima-Villa de Álvarez" (cause problemas al graficar porque tiene largos periodos sin fallecimientos, afortunadamente)
+
+1. Añada una variable llamada *top.size* que identifique a las 50 ciudades más grandes de México de acuerdo a su población, sin incluir a la ciudad de 
+
+---
+
+# Ejercicio 2
+
+1. Use la base *cases.sintomas.csv*. Esta base contiene los casos diarios confirmados de covid-19 por inicio de síntomas en cada municipio de México. Es un panel de datos porque cada municipio tiene datos diarios de 2020 y 2021
+
+1. Reemplace los casos NA por ceros
+
+1. Agregue el número de casos a nivel SUN
+
+1. Genere una variable *cases.acc* que cuente los datos acumulados hasta el día $t$. Es decir, la suma de casos acumulados hasta ayer, más los de hoy
+
+1. Genere una variable  *cases.growth* que indique la tasa de crecimiento de casos de un día al otro
+
+1. Use la base *mundata* con *top.size* del Ejercicio 1 para quedarse solo con las 50 SUN más grandes de México
+
+1. Instale y llame el paquete *lubridate* para poner en formato de fecha la variable **date**
 
 
 ---
 
-class: inverse, middle, center
+# Ejercicio 3
 
-# Ejecución condicional
+1. La curva epidémica es una gráfica que muestra el número de casos diarios confirmados
+
+1. Con el data.frame cases.sintomas, construya la curva epidémica del Valle de México
+
+1. Utilice las siguientes funciones para dar formato a su gráfico
+
+- geom_smooth
+- xlab
+- ylab
+- scale_x_date
+- labs
+- theme
+
 
 ---
 
-# Ejecución condicional
+# Ejercicio 4
 
-Frecuentemente querremos ejecutar una función o realizar un procedimiento si ciertas condiciones se cumplen
+1. Haga ahora el gráfico de la curva epidémica para cada una de las 50 ciudades más grandes usando facetas
 
-Necesitamos aprender algunas formas de condicionar las tareas
 
 ---
 
-# if y else
+# Ejercicio 5
 
-Dado un vector *x*, si el promedio de las entradas es mayor que 5, generar un objeto llamado *resultado* que tome como valor la palabra *alto*. Si el promedio es igual o menor que 5, que *resultado* diga *bajo*
-  
-```{r include=T,echo=T,eval=T, results=T, message=F}
+1. Repita el gráfico del Ejercicio 4 ahora para la tasa de crecimiento de los casos (**cases.growth**)
 
-x <- c(3,4,1,0,2,0)
+1. Repita el gráfico del Ejercicio 4 ahora para la tasa de crecimiento de los fallecimientos (**deaths.growth**)
 
-evaluacion <- function(prueba) {
-  media <- mean(prueba)
-  
-  if(media > 5) {
-    print("alto")
-  } else {
-    print("bajo")
-  }
-}
 
-resultado <- evaluacion(x)
-```
----
 
-# for
-
-Cuando hacemos simulaciones es común querer repetir tareas de acuerdo al valor que toma una variable o algún otro
-
- 
-```{r include=T,echo=T,eval=T, results=T, message=F}
-
-x <- c(3,4,1,0,2,0)
-
-evaluacion <- function(prueba) {
-  media <- mean(prueba)
-  
-  if(media > 5) {
-    print("alto")
-  } else {
-    print("bajo")
-  }
-}
-
-resultado <- evaluacion(x)
-```
 ---
 
 # Próxima clase
+
+Haremos una revisión de la teoría asintótica sobre la que recaen los resultados más importantes de econometría
 
 ---
 

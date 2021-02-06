@@ -24,3 +24,5 @@ Aquí podrán encontrar las diapositivas del curso.
 [Sesión 5](https://rojasirvin.github.io/EEenR/slides/sesion5.html#1). Estadística descriptiva R
 
 [Sesión 6](https://rojasirvin.github.io/EEenR/slides/sesion6.html#1). Principios de gráficas en R
+
+[Sesión 7](https://rojasirvin.github.io/EEenR/slides/sesion7.html#1). Elementos intermedios de programación en R
