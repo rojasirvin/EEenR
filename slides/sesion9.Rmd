@@ -1,0 +1,780 @@
+---
+title: "Teoría asintótica"
+author: "Irvin Rojas"
+date: "12 de febrero de 2021"
+header-includes:
+  - \usepackage{tikz}
+  - \usetikzlibrary{shapes, shadows,arrows}
+output:
+  xaringan::moon_reader:
+    css: [default, "libs/cide.css", metropolis-fonts, "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css", "https://use.fontawesome.com/releases/v5.7.2/css/all.css", "https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css"]
+    seal: false
+    chakra: "https://remarkjs.com/downloads/remark-latest.min.js"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["middle", "center"]
+      ratio: "16:9"
+      beforeInit: ["https://platform.twitter.com/widgets.js", "libs/cols_macro.js"]
+      navigation:
+        scroll: false
+---
+
+class: title-slide
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.path = "figures/")
+library(tidyverse)
+library(magick)
+library(reticulate)
+xfun::pkg_load2(c('base64enc', 'htmltools', 'mime'))
+```
+
+.title[
+# Sesión 9. Teoría asintótica
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas <br> [rojasirvin.com](https://www.rojasirvin.com/) <br> [<i class="fab fa-github"></i>](https://github.com/rojasirvin) [<i class="fab fa-twitter"></i>](https://twitter.com/RojasIrvin) [<i class="ai ai-google-scholar"></i>](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&hl=en)
+]
+
+---
+# Agenda
+  
+1. Repasaremos dos conceptos clave: las leyes de grandes números y los teoremas del límite central
+
+1. Relacionaremos estos conceptos con el estimador de MCO
+
+1. Ejemplificaremos estos conceptos usando simulaciones Monte Carlo
+
+---
+
+class: inverse, center, middle
+
+# Teoría asintótica
+
+---
+
+# Teoría asintótica
+
+Teoría para estudiar el comportamiento límite de una secuencia de variables aleatorias $X_1, X_2, X_3$
+
+¿Qué pasa cuando colectamos e incrementamos la cantidad de información que recolectamos?
+
+Esto nos va a permitir hacer afirmaciones sobre los estimadores que usamos en econometría y sobre sus propiedades en muestras grandes
+
+Un estimador es un resumen de los datos
+
+El estimador más usando en sus primeros cursos de econometría es el estimador de MCO:
+
+$$\hat{\beta}_{MCO}=(X'X)^{-1}X'Y$$
+Vemos $X$, vemos $Y$ y, por tanto, $\hat{\beta}_{MCO}$ es un resumen de los datos
+
+---
+
+# Teoría asintótica
+
+Consideremos secuencias de variables aleatorias $b_N$
+
+Queremos decir algo sobre $b_N$ cuando $N\to \infty$:
+
+  1. La convergencia en probabilidad de $b_N$ a un límite $b$ (una constante)
+  
+  1. Si el límite $b$ es en sí misma una variable aletoria, queremos conocer su distribución límite
+  
+Los estimadores que usamos en econometría son regularmente funciones de sumas y promedios
+  
+Esto nos permite usar leyes de los grandes números y teoremas de límite central para derivar resultados sobre las características de estos estimadores
+
+---
+
+# Convergencia de secuencias
+
+$\{a_N\}$ converge a $a$ si para todo $\varepsilon>0$ existe $N^*=N(\varepsilon)$ tal que para $N>N^*$, $|a_N-a|<\varepsilon$
+
+Por ejemplo:
+
+$$a_N=2+3/N$$
+
+$a_N$ converge a $a=2$ pues $|a_N-a|=3/N<\varepsilon \quad \forall \quad N>N^*=3/\varepsilon$
+
+
+---
+
+# Convergencia de secuencias
+
+Cuando tenemos una secuencia de variables aleatorias, no podemos estar seguros de que la diferencia estará siempre dentro del límite $\varepsilon$
+
+Buscamos entonces que la **probabilidad** de estar en el límite de $\varepsilon$ sea muy cercana a uno
+
+--
+
+<br>
+
+**Convergencia en probabilidad**: $\{b_N\}$ converge en probabilidad a $b$ si para todo $\varepsilon$ y $\delta>0$ existe $N^*=N^*(\varepsilon, \delta)$ tal que:
+
+$$Pr(|b_n-b|<\varepsilon) > 1-\delta$$
+
+La notación más usada es escribir $p\lim b=b$ o $b_n\xrightarrow{p}b$, donde $b$ puede ser una constante o una variable aleatoria
+
+Comúnmente escribimos $b_n\xrightarrow{p}b$ como $b_n-b\xrightarrow{p}0$
+
+
+---
+
+# Consistencia
+
+- Sea $\{b_N\}$ una secuencia de parámetros estimados $\hat{\theta}$
+
+- Un estimador $\hat{\theta}$ es consistente si:
+
+$$p\lim \hat{\theta}=\theta_0$$
+---
+
+# Ejemplo
+
+Recordemos que la distribución normal está dada por la siguiente función de distribución:
+
+$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad 0 \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$
+Y que la esperanza es:
+
+$$E(X)=\frac{a+b}{2}$$
+
+--
+
+Generemos datos de una distribución uniforme con media cero ($\mu=0$)
+
+Establezcamos el rango de la distribución como $\mu+z=z$ y $\mu-z=-z$
+
+Por tanto
+
+$$f(x)=\cases{ \frac{1}{2z} \quad \text{si}\quad -z \leq  x\leq z  \\ 0 \quad \text{en otro caso} }$$
+
+$$E(X)=0$$
+
+Vamos a usar R para generar una muestra aleatoria que venga de una distribución uniforme con media 0 y haremos $z=1$
+
+---
+
+# Ejemplo
+
+
+.pull-left[
+```{r include=T,echo=T,eval=T, results=T, message=F, warning=F}
+mu <- 0
+z <- 1
+medias <- data.frame(medias=matrix(ncol=1,nrow=1000))
+
+
+for (i in 1:1000) {
+  N <- i
+  x <- runif(N,mu-z,mu+z)
+  medias[i,1] <- mean(x) 
+}
+
+g1 <- medias %>% 
+  ggplot(aes(y=medias, x=1:1000))+
+  geom_point()
+
+```
+]
+
+.pull-right[
+```{r include=T,echo=F,eval=T, results=T, message=F, warning=F,out.width = "75%"}
+g1
+```
+
+Cuando incrementamos el tamaño de la muestra, la media muestral está cada vez más cerca del valor poblacional (cero)
+]
+
+
+---
+
+# Teorema de Slutsky
+
+Sea $b_N$ un vector de dimensión finita y $g(\cdot)$ una función real y continua en un vector $b$, entonces:
+
+$$b_n \xrightarrow{p}b \implies g(b_N)\xrightarrow{p}g(b)$$
+Por ejemplo, si $p\lim(b_{1N},b_{2N})=(b_1,b_2)$, entonces $p\lim(b_{1N} b_{2N})=(b_1 b_2)$
+
+---
+
+# Leyes de grandes números (LGN)
+
+Las LGN son teoremas de convergencia en probabilidad cuando $\{b_N\}$ es un promedio muestral, $b_N\equiv \bar{X}_N$
+
+Son teoremas para establecer el límite de una secuencia $\{b_N\}$ en vez de usar *fuerza bruta* y aplicar la definición 
+
+--
+
+<br>
+
+*Una ley de grandes números débil*
+
+  - Especifica las condiciones sobre los $X_i$ en $\bar{X}_N$ para que
+  
+  $$(\bar{X}_N-E(\bar{X}_N))\xrightarrow{p}0$$
+  - Una LGN débil implica que $p\lim\bar{X}_N=\lim E(\bar{X}_N)$
+  
+  - Y si los $X_i$ tienen una media común, entonces $p\lim\bar{X}_N=\mu$
+  
+---
+
+# Leyes de grandes números (LGN)
+
+*LGN de Khinchine*
+  
+Si $\{X_i\}$ son iid y $E(X_i)$ existe, entonces $(\bar{X}_n-\mu \xrightarrow{p}0)$
+
+--
+<br>
+
+
+*LGN fuertes*
+
+  - Relajan las condiciones sobre $X_i$ para casos más generales
+  
+  - Ver por ejemplo el Apéndice A en Cameron y Trivedi (2005)
+  
+  - Por ejemplo, la LGN de Kolmogorov o la de de Markov
+  
+---
+
+# Leyes de grandes números (LGN)
+
+En resumen, si una LGN se puede aplicar:
+
+.pull-left[
+
+$$
+\begin{aligned}
+p\lim {X}_N&=\lim E(\bar{X}_N) \\
+&=\lim N^{-1}\sum_{i=1}^N E(X_i) \\
+&=\mu 
+\end{aligned}
+$$
+
+]
+
+.pull-right[
+en general
+
+si $X_i$ independientes
+
+si las $X_i$ son iid
+]
+
+---
+
+# Convergencia en distribución
+
+La convergencia en distribución implica que $\hat{\theta}$ tiene una distribución degenerada que se colapsa a $\theta_0$
+
+Pero si reescalamos, podemos hacer afirmaciones sobre la distribución límite de $b_n=\sqrt{N}(\hat{\theta}-\theta_0)$
+
+Una secuencia $\{b_N\}$ converge en distribución a la variable $b$ si $$\lim_{N\to\infty} F_N= F$$
+
+donde $F$ es la función de distribución acumulada (cdf) de $b$ en todo punto donde $F$ es continua
+
+Esto también se escribe como $b_N\xrightarrow{d}b$ y a $F$ se le conoce como la distribución límite de $\{b_N\}$
+
+Puede ser que $F_N$ sea muy complicada pero $F$ puede ser una función de la que conocemos sus propiedades (por ejemplo, una normal estándar)
+
+---
+
+# Teorema del mapeo continuo
+
+- Sea $b_N$ un vector de dimensión finita y sea $g(\cdot)$ una función real:
+
+$$b_N\xrightarrow{d}b \implies g(b_N) \xrightarrow{d}g(b)$$
+---
+
+# Teorema de transformación
+
+Sea $a_N\xrightarrow{d}a$ y $b_N\xrightarrow{p}b$, donde $a$ es una variable aleatoria y $b$ una constante
+
+  1. $a_N+b_N \xrightarrow{d}a+b$
+  
+  1. $a_n b_N \xrightarrow{d}ab$
+  
+  1. $a_N/b_N\xrightarrow{d}a/b$
+  
+Es decir, podemos decir algo sobre objetos potencialmente complejos (como productos o cocientes) si sabemos algo de sus partes
+
+---
+
+# Regla del límite normal del producto
+
+Para un vector $a_N$ y una matriz $H_N$ si
+  
+  - $a_N \xrightarrow{d} \mathcal{N}(\mu,A)$
+  
+  - $H_N\xrightarrow{p}H$, donde $H$ es positiva definida
+
+Entonces $H_N a_N \xrightarrow{d}\mathcal{N}(H\mu,HAH')$
+
+---
+
+# Teoremas del límite central (TLC)
+
+Son teoremas de convergencia en distribución cuando $\{b_N\}$ es una media muestral
+
+Primero reescalamos definiendo
+
+$$ b_N\equiv Z_N=\frac{\bar{X}_N-E(\bar{X}_N)}{\sqrt{V(\bar{X}_N)}}\sim(0,1) $$
+
+Un TLC da condiciones sobre las $X_i$ en $\bar{X}_N$ para que
+
+$$ Z_N\xrightarrow{d}\mathcal{N}(0,1) $$
+
+---
+
+# Teoremas del límite central (TLC)
+
+*TLC de Lindeberg-Levy*
+
+Sea $\{X_i\}$ iid con $E(X_i)=\mu$ y $V(X_i)=\sigma^2$, entonces
+
+$$ Z_N=\frac{\sqrt{N}(\bar{X}_N-\mu)}{\sigma}\xrightarrow{d} \mathcal N(0,1) $$
+
+Noten que si $\bar{X}_N$ satisface un TLC, entonces también $h(N)\bar{X}_N$ lo satisface
+ 
+Por ejemplo, $h(N)=\sqrt{N}$, dado que
+ 
+$$ Z_N=\frac{h(N)\bar{X}_N-E(h(N)\bar{X}_N)}{\sqrt{V(h(N)\bar{X}_N)}}$$
+
+En la mayoría de los casos, se usan los TLC a la versión normalizada de $\bar{X_N}$, es decir, $\sqrt{N}\bar{X}_N$ porque $V(h(N)\bar{X}_N)$ es finita
+
+---
+
+# Teoremas del límite central (TLC)
+
+Bajo iid, podemos escribir
+
+$$\frac{\bar{X}_N-\mu}{\sigma / \sqrt{N}}\xrightarrow{d}\mathcal{N}(0,1)$$
+
+O de manera equivalente:
+
+$$\sqrt{N}(\bar{X}_N-\mu)\xrightarrow{d} \mathcal{N}(0,\sigma^2)$$
+---
+
+# Teoremas del límite central (TLC)
+
+*TLC multivariado*
+
+Sea un vector $\bar{X}_N$ con media $\mu_N$ y varianza $V_N$ tal que $\bar{X}_N\sim(\mu_N,V_N)$
+  
+Reescalando, podemos definir:
+  
+  $$Z_N=V_N^{-1/2}(b_N-\mu_N)\sim(\mathbf{0},I)$$
+  
+Un TLC da condiciones sobre $X_i$ en $\bar{X}_N$ para que
+  
+  $$Z_N\xrightarrow{d}\mathcal{N}(\mathbf{0},I)$$
+  
+---
+
+class: inverse, middle, center
+
+# Ejemplos en *R*
+
+---
+
+# Simulaciones Monte Carlo
+
+En muchas ocasiones, las simulaciones nos será útiles para mostrar resultados teóricos cuando trabajamos con datos
+
+La idea es crear un proceso generador de datos en donde nosotros conocemos los parámetros poblacionales
+
+En la práctica, regularmente trabajamos con muestras y no conocemos los parámetros poblacionales que dan origen a los datos que observamos
+
+El propósito de las simulaciones Monte Carlo es evaluar el desempeño de los estimadores
+
+---
+
+# Simulaciones Monte Carlo
+
+Pensemos que queremos estimar el parámetro de la media $\mu$ de una variable con distribución normal usando una muestra de tamaño $n$: $y_i \sim\mathcal{N}(\mu,\sigma^2)$
+
+Sabemos de nuestras clases de estadística que un estimador es la media muestral $\bar{y}$
+
+También sabemos de nuestras clases de estadística que la media muestral tendrá la siguiente distribución:
+
+$$\bar{y}\sim\mathcal{N}(\mu,\sigma^2/n)$$
+--
+
+Podemos usar simulaciones para mostrar que esto es cierto
+
+---
+
+# Simulaciones en *R*
+
+Generemos una muestra y calculemos su media
+
+```{r comment='#', echo=TRUE, collapse=TRUE}
+# Semilla para poder generar la misma secuencia 
+set.seed(820)
+
+# Obtenemos una muestra de tamaño 100 con media 10 y desviación estándar 2
+sample <- rnorm(100,10,2)
+
+# Veamos 10 de las observaciones
+head(sample,10)
+
+#¿Cuál es la media muestral?
+mean(sample)
+
+```
+
+---
+
+# Simulaciones en *R*
+
+
+¿Qué pasa si generamos otra muestra?
+
+```{r, echo=TRUE, collapse=TRUE}
+sample <- rnorm(100,10,2)
+mean(sample)
+
+```
+
+---
+
+# Simulaciones en *R*
+
+Teóricamente, sabemos que la varianza de la media muestral debería ser $\sigma^2/n=2^2/100=0.04$
+
+Podemos repetir el proceso anterior muchas veces para comprobarlo
+
+No queremos hacer "copy-paste" mil veces
+
+Los ciclos, circuitos, blucles o *loops* son una serie de acciones que se repiten muchas veces
+
+En este caso, queremos hacer mil veces lo siguiente: obten un vector de 100 observaciones que provengan de una distribución $\mathcal{N}(10,2)$, obtener el promedio de dicha muestra y guardarlo en un vector de medias
+
+La función *for* hace esta tarea
+
+Debemos indicar un índice, al que nosotros llamamos como queramos, y los límites de ese índice
+
+---
+
+# Simulaciones en *R*
+
+En este caso, *i* es el índice que corre desde el 1 hasta el número de repeticiones
+
+Creamos un vector *ymedias* para ir coleccionando las medias calculadas en cada uno de los *i* pasos
+
+```{r, echo=T, collapse=T}
+set.seed(820)
+
+# Un vector para guardar las medias calculadas. Haremos 1,000 cálculos
+
+reps <- 1000
+ymedias <- data.frame(medias=numeric(reps))
+
+# En cada una de las 1000 repeticiones, obtendremos una muestra de tamaño 100
+for (i in 1:reps){
+  sample<- rnorm(100,10,2) 
+  ymedias[i,1]<-mean(sample)
+}
+
+
+```
+
+
+---
+
+# Simulaciones en *R*
+
+Veamos la media y desviación estándar de las medias calculadas:
+
+```{r, echo=T, collapse=T}
+mean(ymedias)
+
+var(ymedias)
+```
+
+Es justo lo que la teoría nos anticipaba
+
+---
+
+# Simulaciones en *R*
+
+Hacemos ahora un gráfico de las medias estimadas junto con una curva normal:
+
+```{r,echo=T,collapse=T,out.width="25% ",fig.align='center'}
+ymedias %>% 
+  ggplot(aes(medias))+
+  geom_density(linetype="dashed")+
+  stat_function(fun = dnorm,
+                args = list(mean = 10, sd = sqrt(.04)))+
+  labs(caption = "Línea rota: medias simuladas")
+
+```
+
+---
+
+# LGN en acción
+
+Una LGN nos dice que la media muestral converge en probabilidad al parámetro poblacional $\mu$ cuando $n\to\infty$
+
+Esto también significa que conforme va creciendo el tamaño de la muestra, la varianza va desapareciendo, $Var(\bar{y}\to 0$
+
+Una forma de verificar esto es haciendo las muestras arbitrariamente grandes
+
+---
+
+# LGN en acción
+
+.pull-left[
+Vamos a obtener muestras aleatorias de una distribución normal $\mathcal{N}(10,2)$
+
+Para cada muestra obtendremos el promedio muestral
+
+Iremos variando el tamaño de la muestra
+
+Para cada tamaño de muestra, haremos mil repeticiones
+
+Comenzaremos con $n=10$. Es decir, haremos mil veces el proceso de obtener 10 observaciones provenientes de una normal $\mathcal{N}(10,2)$
+]
+
+.pull-right[
+
+```{r,echo=T,collapse=T,warning=F}
+
+set.seed(820)
+
+reps <- 1000
+
+ymedias10 <- data.frame(medias=numeric(reps))
+
+for (i in 1:reps){
+ sample<- rnorm(10,10,2) 
+ ymedias10[i,1]<-mean(sample)
+}
+
+mean(ymedias10$medias)
+
+```
+]
+
+
+---
+
+# LGN en acción
+
+.pull-left[
+Ahora, incrementaremos el tamaño de la muestra
+
+Primero aumentamos a 50 observaciones, luego a 100 y luego a 1,000
+
+```{r,echo=F,collapse=F}
+
+set.seed(820)
+
+reps <- 1000
+
+ymedias10 <- data.frame(medias10=numeric(reps))
+for (i in 1:reps){
+  sample<- rnorm(10,10,2) 
+  ymedias10[i,1]<-mean(sample)
+}
+
+ymedias50 <- data.frame(medias50=numeric(reps))
+for (i in 1:reps){
+  sample<- rnorm(50,10,2) 
+  ymedias50[i,1]<-mean(sample)
+}
+
+ymedias100 <- data.frame(medias100=numeric(reps))
+for (i in 1:reps){
+  sample<- rnorm(100,10,2) 
+  ymedias100[i,1]<-mean(sample)
+}
+
+ymedias1000 <-data.frame(medias1000=numeric(reps))
+for (i in 1:reps){
+  sample<- rnorm(1000,10,2) 
+  ymedias1000[i,1]<-mean(sample)
+}
+
+#Voy a poner todo en un data frame
+
+ysim <- data.frame(cbind(ymedias10,ymedias50,ymedias100,ymedias1000))
+
+#pivot_longer pone los datos en panel (veremos esto más adelante en el curso)
+ysim <-  ysim %>% 
+  pivot_longer(cols = c("medias10","medias50","medias100","medias1000"),
+               names_to = "tamaño",
+               values_to = "media")
+
+#Ponemos factores
+ysim <- ysim %>% 
+  mutate(tamaño=factor(tamaño,
+                       levels=c("medias10","medias50","medias100","medias1000"),
+                       labels=c("10 obs","50 obs","100 obs","1000 obs")))
+
+
+
+```
+]
+
+.pull-right[
+```{r,echo=F,collapse=F, out.width="75%"}
+
+ysim %>% 
+  ggplot(aes(media, color=tamaño))+
+  geom_density()
+
+
+```
+]
+
+---
+
+# TLC en acción
+
+En el ejemplo anterior, $y_i$ se distribuía normal y, por lo tanto, era de esperarse que la media muestral se distribuyera también normal
+
+Sin embargo, un TLC nos indica que la media muestral se distribuye normal cuando $n\to\infty$, bajo algunas condiciones para la varianza de $y_i$
+
+No se requiere que $y_i$ sea normal
+
+Usemos una distribución $\chi^2$ con un grado de libertad:
+
+.pull-left[
+```{r comment='#', echo=TRUE, collapse=TRUE}
+set.seed(820)
+
+sample <- rchisq(100,1)
+
+```
+]
+
+--
+.pull-right[
+```{r comment='#', echo=TRUE, collapse=TRUE, fig.height=2.8, fig.align='center'}
+curve(dchisq(x,1), 0,3)
+```
+]
+
+---
+
+# TLC en acción
+
+Ahora seguimos el procedimiento que usamos en el ejemplo con variables normales
+
+Recordemos que para una $\chi^2$ con $\nu$ grados de libertad la media es $\nu$ y la varianza es $2\nu$
+
+Por tanto, el TLC nos dice que $\bar{y}\sim\mathcal{N}(\nu,2\nu/N)$
+
+```{r,echo=F,collapse=F}
+
+reps <- 1000
+vsim <- data.frame(matrix(ncol=4,nrow=reps))
+colnames(vsim) <- c("medias5","medias10","medias100","medias10000")
+
+ntam <- c(5,10,100,10000)
+
+for (j in ntam){
+  if (j==5){
+    for (i in 1:reps){
+      sample<-rchisq(j,1)
+      vsim[i,1]<-mean(sample)
+    }
+  }
+  else{
+    if ( j==10)
+      for (i in 1:reps){
+        sample<-rchisq(j,1)
+        vsim[i,2]<-mean(sample)
+      }
+    else{
+      if ( j==100)
+        for (i in 1:reps){
+          sample<-rchisq(j,1)
+          vsim[i,3]<-mean(sample)
+        }
+      else{
+        if ( j==10000)
+          for (i in 1:reps){
+            sample<-rchisq(j,1)
+            vsim[i,4]<-mean(sample)
+          }
+      }
+    }
+  }
+}
+
+vsim <-  vsim %>% 
+  pivot_longer(cols = c("medias5","medias10","medias100","medias10000"),
+               names_to = "tamaño",
+               values_to = "media")
+
+
+#Ponemos factores
+vsim <- vsim %>% 
+  mutate(tamaño=factor(tamaño,
+                       levels=c("medias5","medias10","medias100","medias10000"),
+                       labels=c("5 obs","10 obs","100 obs","10000 obs")))
+
+
+```
+
+---
+
+# TLC en acción
+
+.pull-left[
+
+Para los cuatro tamaños de muestra
+
+```{r,echo=F,collapse=F, out.width="70%"}
+vsim %>% 
+  ggplot(aes(media, color=tamaño))+
+  geom_density()
+```
+]
+
+.pull-right[
+
+Cuando $n=10000$
+
+```{r,echo=F,collapse=F, out.width="70%"}
+vsim %>% 
+  filter(tamaño=="10000 obs") %>% 
+  ggplot(aes(media))+
+  geom_density()+
+  stat_function(fun = dnorm,
+                args = list(mean = 1, sd = sqrt(2/10000)),linetype="dashed")
+  
+
+```
+]
+
+---
+
+# Próxima sesión
+
+Haremos un repaso sobre el modelo de regresión lineal
+
+Aprenderemos a implementar el modelo de regresión lineal en R
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**

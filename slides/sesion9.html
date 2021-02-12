@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Teoría asintótica</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Irvin Rojas" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+    <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide
+
+
+
+.title[
+# Sesión 9. Teoría asintótica
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas &lt;br&gt; [rojasirvin.com](https://www.rojasirvin.com/) &lt;br&gt; [&lt;i class="fab fa-github"&gt;&lt;/i&gt;](https://github.com/rojasirvin) [&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;](https://twitter.com/RojasIrvin) [&lt;i class="ai ai-google-scholar"&gt;&lt;/i&gt;](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&amp;hl=en)
+]
+
+---
+# Agenda
+  
+1. Repasaremos dos conceptos clave: las leyes de grandes números y los teoremas del límite central
+
+1. Relacionaremos estos conceptos con el estimador de MCO
+
+1. Ejemplificaremos estos conceptos usando simulaciones Monte Carlo
+
+---
+
+class: inverse, center, middle
+
+# Teoría asintótica
+
+---
+
+# Teoría asintótica
+
+Teoría para estudiar el comportamiento límite de una secuencia de variables aleatorias `\(X_1, X_2, X_3\)`
+
+¿Qué pasa cuando colectamos e incrementamos la cantidad de información que recolectamos?
+
+Esto nos va a permitir hacer afirmaciones sobre los estimadores que usamos en econometría y sobre sus propiedades en muestras grandes
+
+Un estimador es un resumen de los datos
+
+El estimador más usando en sus primeros cursos de econometría es el estimador de MCO:
+
+`$$\hat{\beta}_{MCO}=(X'X)^{-1}X'Y$$`
+Vemos `\(X\)`, vemos `\(Y\)` y, por tanto, `\(\hat{\beta}_{MCO}\)` es un resumen de los datos
+
+---
+
+# Teoría asintótica
+
+Consideremos secuencias de variables aleatorias `\(b_N\)`
+
+Queremos decir algo sobre `\(b_N\)` cuando `\(N\to \infty\)`:
+
+  1. La convergencia en probabilidad de `\(b_N\)` a un límite `\(b\)` (una constante)
+  
+  1. Si el límite `\(b\)` es en sí misma una variable aletoria, queremos conocer su distribución límite
+  
+Los estimadores que usamos en econometría son regularmente funciones de sumas y promedios
+  
+Esto nos permite usar leyes de los grandes números y teoremas de límite central para derivar resultados sobre las características de estos estimadores
+
+---
+
+# Convergencia de secuencias
+
+`\(\{a_N\}\)` converge a `\(a\)` si para todo `\(\varepsilon&gt;0\)` existe `\(N^*=N(\varepsilon)\)` tal que para `\(N&gt;N^*\)`, `\(|a_N-a|&lt;\varepsilon\)`
+
+Por ejemplo:
+
+`$$a_N=2+3/N$$`
+
+`\(a_N\)` converge a `\(a=2\)` pues `\(|a_N-a|=3/N&lt;\varepsilon \quad \forall \quad N&gt;N^*=3/\varepsilon\)`
+
+
+---
+
+# Convergencia de secuencias
+
+Cuando tenemos una secuencia de variables aleatorias, no podemos estar seguros de que la diferencia estará siempre dentro del límite `\(\varepsilon\)`
+
+Buscamos entonces que la **probabilidad** de estar en el límite de `\(\varepsilon\)` sea muy cercana a uno
+
+--
+
+&lt;br&gt;
+
+**Convergencia en probabilidad**: `\(\{b_N\}\)` converge en probabilidad a `\(b\)` si para todo `\(\varepsilon\)` y `\(\delta&gt;0\)` existe `\(N^*=N^*(\varepsilon, \delta)\)` tal que:
+
+`$$Pr(|b_n-b|&lt;\varepsilon) &gt; 1-\delta$$`
+
+La notación más usada es escribir `\(p\lim b=b\)` o `\(b_n\xrightarrow{p}b\)`, donde `\(b\)` puede ser una constante o una variable aleatoria
+
+Comúnmente escribimos `\(b_n\xrightarrow{p}b\)` como `\(b_n-b\xrightarrow{p}0\)`
+
+
+---
+
+# Consistencia
+
+- Sea `\(\{b_N\}\)` una secuencia de parámetros estimados `\(\hat{\theta}\)`
+
+- Un estimador `\(\hat{\theta}\)` es consistente si:
+
+`$$p\lim \hat{\theta}=\theta_0$$`
+---
+
+# Ejemplo
+
+Recordemos que la distribución normal está dada por la siguiente función de distribución:
+
+`$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad 0 \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$`
+Y que la esperanza es:
+
+`$$E(X)=\frac{a+b}{2}$$`
+
+--
+
+Generemos datos de una distribución uniforme con media cero ($\mu=0$)
+
+Establezcamos el rango de la distribución como `\(\mu+z=z\)` y `\(\mu-z=-z\)`
+
+Por tanto
+
+`$$f(x)=\cases{ \frac{1}{2z} \quad \text{si}\quad -z \leq  x\leq z  \\ 0 \quad \text{en otro caso} }$$`
+
+`$$E(X)=0$$`
+
+Vamos a usar R para generar una muestra aleatoria que venga de una distribución uniforme con media 0 y haremos `\(z=1\)`
+
+---
+
+# Ejemplo
+
+
+.pull-left[
+
+```r
+mu &lt;- 0
+z &lt;- 1
+medias &lt;- data.frame(medias=matrix(ncol=1,nrow=1000))
+
+
+for (i in 1:1000) {
+  N &lt;- i
+  x &lt;- runif(N,mu-z,mu+z)
+  medias[i,1] &lt;- mean(x) 
+}
+
+g1 &lt;- medias %&gt;% 
+  ggplot(aes(y=medias, x=1:1000))+
+  geom_point()
+```
+]
+
+.pull-right[
+&lt;img src="figures/unnamed-chunk-2-1.png" width="75%" /&gt;
+
+Cuando incrementamos el tamaño de la muestra, la media muestral está cada vez más cerca del valor poblacional (cero)
+]
+
+
+---
+
+# Teorema de Slutsky
+
+Sea `\(b_N\)` un vector de dimensión finita y `\(g(\cdot)\)` una función real y continua en un vector `\(b\)`, entonces:
+
+`$$b_n \xrightarrow{p}b \implies g(b_N)\xrightarrow{p}g(b)$$`
+Por ejemplo, si `\(p\lim(b_{1N},b_{2N})=(b_1,b_2)\)`, entonces `\(p\lim(b_{1N} b_{2N})=(b_1 b_2)\)`
+
+---
+
+# Leyes de grandes números (LGN)
+
+Las LGN son teoremas de convergencia en probabilidad cuando `\(\{b_N\}\)` es un promedio muestral, `\(b_N\equiv \bar{X}_N\)`
+
+Son teoremas para establecer el límite de una secuencia `\(\{b_N\}\)` en vez de usar *fuerza bruta* y aplicar la definición 
+
+--
+
+&lt;br&gt;
+
+*Una ley de grandes números débil*
+
+  - Especifica las condiciones sobre los `\(X_i\)` en `\(\bar{X}_N\)` para que
+  
+  `$$(\bar{X}_N-E(\bar{X}_N))\xrightarrow{p}0$$`
+  - Una LGN débil implica que `\(p\lim\bar{X}_N=\lim E(\bar{X}_N)\)`
+  
+  - Y si los `\(X_i\)` tienen una media común, entonces `\(p\lim\bar{X}_N=\mu\)`
+  
+---
+
+# Leyes de grandes números (LGN)
+
+*LGN de Khinchine*
+  
+Si `\(\{X_i\}\)` son iid y `\(E(X_i)\)` existe, entonces `\((\bar{X}_n-\mu \xrightarrow{p}0)\)`
+
+--
+&lt;br&gt;
+
+
+*LGN fuertes*
+
+  - Relajan las condiciones sobre `\(X_i\)` para casos más generales
+  
+  - Ver por ejemplo el Apéndice A en Cameron y Trivedi (2005)
+  
+  - Por ejemplo, la LGN de Kolmogorov o la de de Markov
+  
+---
+
+# Leyes de grandes números (LGN)
+
+En resumen, si una LGN se puede aplicar:
+
+.pull-left[
+
+$$
+`\begin{aligned}
+p\lim {X}_N&amp;=\lim E(\bar{X}_N) \\
+&amp;=\lim N^{-1}\sum_{i=1}^N E(X_i) \\
+&amp;=\mu 
+\end{aligned}`
+$$
+
+]
+
+.pull-right[
+en general
+
+si `\(X_i\)` independientes
+
+si las `\(X_i\)` son iid
+]
+
+---
+
+# Convergencia en distribución
+
+La convergencia en distribución implica que `\(\hat{\theta}\)` tiene una distribución degenerada que se colapsa a `\(\theta_0\)`
+
+Pero si reescalamos, podemos hacer afirmaciones sobre la distribución límite de `\(b_n=\sqrt{N}(\hat{\theta}-\theta_0)\)`
+
+Una secuencia `\(\{b_N\}\)` converge en distribución a la variable `\(b\)` si `$$\lim_{N\to\infty} F_N= F$$`
+
+donde `\(F\)` es la función de distribución acumulada (cdf) de `\(b\)` en todo punto donde `\(F\)` es continua
+
+Esto también se escribe como `\(b_N\xrightarrow{d}b\)` y a `\(F\)` se le conoce como la distribución límite de `\(\{b_N\}\)`
+
+Puede ser que `\(F_N\)` sea muy complicada pero `\(F\)` puede ser una función de la que conocemos sus propiedades (por ejemplo, una normal estándar)
+
+---
+
+# Teorema del mapeo continuo
+
+- Sea `\(b_N\)` un vector de dimensión finita y sea `\(g(\cdot)\)` una función real:
+
+`$$b_N\xrightarrow{d}b \implies g(b_N) \xrightarrow{d}g(b)$$`
+---
+
+# Teorema de transformación
+
+Sea `\(a_N\xrightarrow{d}a\)` y `\(b_N\xrightarrow{p}b\)`, donde `\(a\)` es una variable aleatoria y `\(b\)` una constante
+
+  1. `\(a_N+b_N \xrightarrow{d}a+b\)`
+  
+  1. `\(a_n b_N \xrightarrow{d}ab\)`
+  
+  1. `\(a_N/b_N\xrightarrow{d}a/b\)`
+  
+Es decir, podemos decir algo sobre objetos potencialmente complejos (como productos o cocientes) si sabemos algo de sus partes
+
+---
+
+# Regla del límite normal del producto
+
+Para un vector `\(a_N\)` y una matriz `\(H_N\)` si
+  
+  - `\(a_N \xrightarrow{d} \mathcal{N}(\mu,A)\)`
+  
+  - `\(H_N\xrightarrow{p}H\)`, donde `\(H\)` es positiva definida
+
+Entonces `\(H_N a_N \xrightarrow{d}\mathcal{N}(H\mu,HAH')\)`
+
+---
+
+# Teoremas del límite central (TLC)
+
+Son teoremas de convergencia en distribución cuando `\(\{b_N\}\)` es una media muestral
+
+Primero reescalamos definiendo
+
+$$ b_N\equiv Z_N=\frac{\bar{X}_N-E(\bar{X}_N)}{\sqrt{V(\bar{X}_N)}}\sim(0,1) $$
+
+Un TLC da condiciones sobre las `\(X_i\)` en `\(\bar{X}_N\)` para que
+
+$$ Z_N\xrightarrow{d}\mathcal{N}(0,1) $$
+
+---
+
+# Teoremas del límite central (TLC)
+
+*TLC de Lindeberg-Levy*
+
+Sea `\(\{X_i\}\)` iid con `\(E(X_i)=\mu\)` y `\(V(X_i)=\sigma^2\)`, entonces
+
+$$ Z_N=\frac{\sqrt{N}(\bar{X}_N-\mu)}{\sigma}\xrightarrow{d} \mathcal N(0,1) $$
+
+Noten que si `\(\bar{X}_N\)` satisface un TLC, entonces también `\(h(N)\bar{X}_N\)` lo satisface
+ 
+Por ejemplo, `\(h(N)=\sqrt{N}\)`, dado que
+ 
+$$ Z_N=\frac{h(N)\bar{X}_N-E(h(N)\bar{X}_N)}{\sqrt{V(h(N)\bar{X}_N)}}$$
+
+En la mayoría de los casos, se usan los TLC a la versión normalizada de `\(\bar{X_N}\)`, es decir, `\(\sqrt{N}\bar{X}_N\)` porque `\(V(h(N)\bar{X}_N)\)` es finita
+
+---
+
+# Teoremas del límite central (TLC)
+
+Bajo iid, podemos escribir
+
+`$$\frac{\bar{X}_N-\mu}{\sigma / \sqrt{N}}\xrightarrow{d}\mathcal{N}(0,1)$$`
+
+O de manera equivalente:
+
+`$$\sqrt{N}(\bar{X}_N-\mu)\xrightarrow{d} \mathcal{N}(0,\sigma^2)$$`
+---
+
+# Teoremas del límite central (TLC)
+
+*TLC multivariado*
+
+Sea un vector `\(\bar{X}_N\)` con media `\(\mu_N\)` y varianza `\(V_N\)` tal que `\(\bar{X}_N\sim(\mu_N,V_N)\)`
+  
+Reescalando, podemos definir:
+  
+  `$$Z_N=V_N^{-1/2}(b_N-\mu_N)\sim(\mathbf{0},I)$$`
+  
+Un TLC da condiciones sobre `\(X_i\)` en `\(\bar{X}_N\)` para que
+  
+  `$$Z_N\xrightarrow{d}\mathcal{N}(\mathbf{0},I)$$`
+  
+---
+
+class: inverse, middle, center
+
+# Ejemplos en *R*
+
+---
+
+# Simulaciones Monte Carlo
+
+En muchas ocasiones, las simulaciones nos será útiles para mostrar resultados teóricos cuando trabajamos con datos
+
+La idea es crear un proceso generador de datos en donde nosotros conocemos los parámetros poblacionales
+
+En la práctica, regularmente trabajamos con muestras y no conocemos los parámetros poblacionales que dan origen a los datos que observamos
+
+El propósito de las simulaciones Monte Carlo es evaluar el desempeño de los estimadores
+
+---
+
+# Simulaciones Monte Carlo
+
+Pensemos que queremos estimar el parámetro de la media `\(\mu\)` de una variable con distribución normal usando una muestra de tamaño `\(n\)`: `\(y_i \sim\mathcal{N}(\mu,\sigma^2)\)`
+
+Sabemos de nuestras clases de estadística que un estimador es la media muestral `\(\bar{y}\)`
+
+También sabemos de nuestras clases de estadística que la media muestral tendrá la siguiente distribución:
+
+`$$\bar{y}\sim\mathcal{N}(\mu,\sigma^2/n)$$`
+--
+
+Podemos usar simulaciones para mostrar que esto es cierto
+
+---
+
+# Simulaciones en *R*
+
+Generemos una muestra y calculemos su media
+
+
+```r
+# Semilla para poder generar la misma secuencia 
+set.seed(820)
+
+# Obtenemos una muestra de tamaño 100 con media 10 y desviación estándar 2
+sample &lt;- rnorm(100,10,2)
+
+# Veamos 10 de las observaciones
+head(sample,10)
+#  [1] 11.679922 10.180688  8.030958  8.018253
+#  [5]  7.965878  5.945978 10.727039  6.837412
+#  [9]  9.181732  9.916600
+
+#¿Cuál es la media muestral?
+mean(sample)
+# [1] 9.645554
+```
+
+---
+
+# Simulaciones en *R*
+
+
+¿Qué pasa si generamos otra muestra?
+
+
+```r
+sample &lt;- rnorm(100,10,2)
+mean(sample)
+## [1] 10.2209
+```
+
+---
+
+# Simulaciones en *R*
+
+Teóricamente, sabemos que la varianza de la media muestral debería ser `\(\sigma^2/n=2^2/100=0.04\)`
+
+Podemos repetir el proceso anterior muchas veces para comprobarlo
+
+No queremos hacer "copy-paste" mil veces
+
+Los ciclos, circuitos, blucles o *loops* son una serie de acciones que se repiten muchas veces
+
+En este caso, queremos hacer mil veces lo siguiente: obten un vector de 100 observaciones que provengan de una distribución `\(\mathcal{N}(10,2)\)`, obtener el promedio de dicha muestra y guardarlo en un vector de medias
+
+La función *for* hace esta tarea
+
+Debemos indicar un índice, al que nosotros llamamos como queramos, y los límites de ese índice
+
+---
+
+# Simulaciones en *R*
+
+En este caso, *i* es el índice que corre desde el 1 hasta el número de repeticiones
+
+Creamos un vector *ymedias* para ir coleccionando las medias calculadas en cada uno de los *i* pasos
+
+
+```r
+set.seed(820)
+
+# Un vector para guardar las medias calculadas. Haremos 1,000 cálculos
+
+reps &lt;- 1000
+ymedias &lt;- data.frame(medias=numeric(reps))
+
+# En cada una de las 1000 repeticiones, obtendremos una muestra de tamaño 100
+for (i in 1:reps){
+  sample&lt;- rnorm(100,10,2) 
+  ymedias[i,1]&lt;-mean(sample)
+}
+
+```
+
+
+---
+
+# Simulaciones en *R*
+
+Veamos la media y desviación estándar de las medias calculadas:
+
+
+```r
+mean(ymedias)
+## Warning in mean.default(ymedias): argument is not
+## numeric or logical: returning NA
+## [1] NA
+
+var(ymedias)
+##           medias
+## medias 0.0413458
+```
+
+Es justo lo que la teoría nos anticipaba
+
+---
+
+# Simulaciones en *R*
+
+Hacemos ahora un gráfico de las medias estimadas junto con una curva normal:
+
+
+```r
+ymedias %&gt;% 
+  ggplot(aes(medias))+
+  geom_density(linetype="dashed")+
+  stat_function(fun = dnorm,
+                args = list(mean = 10, sd = sqrt(.04)))+
+  labs(caption = "Línea rota: medias simuladas")
+```
+
+&lt;img src="figures/unnamed-chunk-7-1.png" width="25% " style="display: block; margin: auto;" /&gt;
+
+---
+
+# LGN en acción
+
+Una LGN nos dice que la media muestral converge en probabilidad al parámetro poblacional `\(\mu\)` cuando `\(n\to\infty\)`
+
+Esto también significa que conforme va creciendo el tamaño de la muestra, la varianza va desapareciendo, `\(Var(\bar{y}\to 0\)`
+
+Una forma de verificar esto es haciendo las muestras arbitrariamente grandes
+
+---
+
+# LGN en acción
+
+.pull-left[
+Vamos a obtener muestras aleatorias de una distribución normal `\(\mathcal{N}(10,2)\)`
+
+Para cada muestra obtendremos el promedio muestral
+
+Iremos variando el tamaño de la muestra
+
+Para cada tamaño de muestra, haremos mil repeticiones
+
+Comenzaremos con `\(n=10\)`. Es decir, haremos mil veces el proceso de obtener 10 observaciones provenientes de una normal `\(\mathcal{N}(10,2)\)`
+]
+
+.pull-right[
+
+
+```r
+
+set.seed(820)
+
+reps &lt;- 1000
+
+ymedias10 &lt;- data.frame(medias=numeric(reps))
+
+for (i in 1:reps){
+ sample&lt;- rnorm(10,10,2) 
+ ymedias10[i,1]&lt;-mean(sample)
+}
+
+mean(ymedias10$medias)
+## [1] 9.987968
+```
+]
+
+
+---
+
+# LGN en acción
+
+.pull-left[
+Ahora, incrementaremos el tamaño de la muestra
+
+Primero aumentamos a 50 observaciones, luego a 100 y luego a 1,000
+
+
+]
+
+.pull-right[
+&lt;img src="figures/unnamed-chunk-10-1.png" width="75%" /&gt;
+]
+
+---
+
+# TLC en acción
+
+En el ejemplo anterior, `\(y_i\)` se distribuía normal y, por lo tanto, era de esperarse que la media muestral se distribuyera también normal
+
+Sin embargo, un TLC nos indica que la media muestral se distribuye normal cuando `\(n\to\infty\)`, bajo algunas condiciones para la varianza de `\(y_i\)`
+
+No se requiere que `\(y_i\)` sea normal
+
+Usemos una distribución `\(\chi^2\)` con un grado de libertad:
+
+.pull-left[
+
+```r
+set.seed(820)
+
+sample &lt;- rchisq(100,1)
+```
+]
+
+--
+.pull-right[
+
+```r
+curve(dchisq(x,1), 0,3)
+```
+
+&lt;img src="figures/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# TLC en acción
+
+Ahora seguimos el procedimiento que usamos en el ejemplo con variables normales
+
+Recordemos que para una `\(\chi^2\)` con `\(\nu\)` grados de libertad la media es `\(\nu\)` y la varianza es `\(2\nu\)`
+
+Por tanto, el TLC nos dice que `\(\bar{y}\sim\mathcal{N}(\nu,2\nu/N)\)`
+
+
+
+---
+
+# TLC en acción
+
+.pull-left[
+
+Para los cuatro tamaños de muestra
+
+&lt;img src="figures/unnamed-chunk-14-1.png" width="70%" /&gt;
+]
+
+.pull-right[
+
+Cuando `\(n=10000\)`
+
+&lt;img src="figures/unnamed-chunk-15-1.png" width="70%" /&gt;
+]
+
+---
+
+# Próxima sesión
+
+Haremos un repaso sobre el modelo de regresión lineal
+
+Aprenderemos a implementar el modelo de regresión lineal en R
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="libs/cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

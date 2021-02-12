@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Modelos lineales</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Irvin Rojas" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+    <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide
+
+
+
+.title[
+# Sesión 10. Modelos lineales
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas &lt;br&gt; [rojasirvin.com](https://www.rojasirvin.com/) &lt;br&gt; [&lt;i class="fab fa-github"&gt;&lt;/i&gt;](https://github.com/rojasirvin) [&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;](https://twitter.com/RojasIrvin) [&lt;i class="ai ai-google-scholar"&gt;&lt;/i&gt;](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&amp;hl=en)
+]
+
+---
+# Agenda
+  
+1. 
+
+---
+
+class: inverse, middle, center
+
+Estimador de MCO
+
+---
+
+# Modelo bivariado
+
+Estamos interesados en estimar los parámetros poblacionales de un modelo de regresión lineal
+
+`$$y=\beta_0+\beta_1 x +u$$`
+
+En su primer cuso de econometría encontraron que
+
+`$$\hat{\beta_0}=\bar{y}-\hat{\beta_1}\bar{x}$$`
+`$$\hat{\beta_1}=\frac{Cov(x,y)}{Var(x)}$$`
+---
+
+# Modelo bivariado
+
+Basta con calcular los ingredientes
+
+
+```r
+setwd("C:/Users/Irvin/Dropbox/Ejercicios en R/datos/")
+
+data.mlb &lt;- read_csv(file = "./salarios_mlb.csv", locale = locale(encoding = "latin1")) %&gt;% 
+    mutate(salary = exp(lsalary))
+
+
+b1 &lt;- cov(data.mlb$salary, data.mlb$hmrun)/var(data.mlb$hmrun)
+b0 &lt;- mean(data.mlb$salary) - mean(data.mlb$hmrun) * b1
+
+b1
+## [1] 17.67095
+b0
+## [1] 330.5935
+```
+---
+
+# lm()
+
+.pull-left[
+La forma corta de hacer esto en R es usando la función *lm()*
+
+¿Cómo se interpreta `\(\beta_0\)` y `\(\beta_1\)`?
+
+]
+
+.pull-right[
+
+```r
+summary(res1 &lt;- lm(data = data.mlb, salary ~ hmrun))
+## 
+## Call:
+## lm(formula = salary ~ hmrun, data = data.mlb)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -748.73 -275.49  -79.27  184.72 1829.00 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  330.594     43.551   7.591 5.64e-13 ***
+## hmrun         17.671      2.995   5.900 1.13e-08 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 424.6 on 261 degrees of freedom
+## Multiple R-squared:  0.1177,	Adjusted R-squared:  0.1143 
+## F-statistic: 34.81 on 1 and 261 DF,  p-value: 1.125e-08
+```
+]
+
+
+---
+
+# Modelo bivariado
+
+.pull-left[
+Gráficamente, el problema de MCO se puede representar de la siguiente forma
+]
+
+.pull-right[
+
+```r
+data.mlb %&gt;%
+  ggplot(aes(x=hmrun,y=salary))+
+  geom_point()+
+  geom_smooth(method="lm")
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+&lt;img src="figures/unnamed-chunk-3-1.png" width="75%" /&gt;
+]
+
+
+---
+
+# Bondad de ajuste
+
+Sabemos que una médida de la bonda de ajuste del modelo es `\(R^2\)`
+
+`$$R^2=\frac{SCR}{SCT}=1-\frac{SCE}{SCT}$$`
+
+Nos dice cuánto de la variación en `\(y\)` es explicada por la regresión, `\(SCR\)`
+
+
+```r
+summary(res1)$r.squared
+## [1] 0.1176683
+```
+
+
+---
+
+# Regresión con logaritmos
+
+Si tenemos un modelo de la forma
+
+`$$log(y)=\beta_0+\beta_1 x +u$$`
+¿Cómo se interpreta `\(\beta_1\)`?
+
+--
+
+En su curso de econometría mostraron que en este caso
+
+`$$\frac{dy}{dx}=\beta_1 y$$`
+
+Así, el coeficiente tiene una interpretación de semielasticidad
+
+Un cambio en una unidad de `\(x\)` se asocia con un cambio de `\(100\beta_1\)` porciento en `\(y\)`
+
+---
+
+# Modelo log-lineal
+
+
+```r
+(res2 &lt;- lm(data=data.mlb, lsalary ~ hmrun))
+## 
+## Call:
+## lm(formula = lsalary ~ hmrun, data = data.mlb)
+## 
+## Coefficients:
+## (Intercept)        hmrun  
+##     5.52624      0.03451
+```
+--
+
+¿Qué significan estos resultados?
+
+
+---
+
+# Ejercicio 1
+
+1. Estime ahora un modelo log-log
+
+1. Deberá crear una variable que indique el log del número de home runs
+
+1. ¿Cómo se interpreta `\(\beta_1\)` en este modelo
+
+
+
+---
+
+# Modelo multivariado
+
+.pull-left[
+La extensión natural del modelo bivariado es el modelo multivariado, donde tenemos `\(K\)` regresores o variables explicativas
+
+`$$log(y)=\beta_0+\beta_1 x_1 + \beta_2 x_2 + \ldots+\beta_K X_K +u$$`
+
+
+La interpretación de los coeficientes individuales es la misma que en el modelo bivariado
+
+
+]
+
+.pull-right[
+
+```r
+summary(res3 &lt;- lm(data=data.mlb,
+                   lsalary ~ hmrun+years+atbat))
+## 
+## Call:
+## lm(formula = lsalary ~ hmrun + years + atbat, data = data.mlb)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.7871 -0.5326  0.0357  0.4416  3.1889 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 4.2352857  0.1341712  31.566  &lt; 2e-16 ***
+## hmrun       0.0078900  0.0056231   1.403    0.162    
+## years       0.0971821  0.0085451  11.373  &lt; 2e-16 ***
+## atbat       0.0022041  0.0003321   6.636 1.88e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.6575 on 259 degrees of freedom
+## Multiple R-squared:  0.4595,	Adjusted R-squared:  0.4532 
+## F-statistic: 73.38 on 3 and 259 DF,  p-value: &lt; 2.2e-16
+```
+]
+
+---
+
+# Modelos con polinomios
+
+
+.pull-left[
+Podemos introducir regresores en forma de polinomios para describir mejor a los datos
+
+`$$log(salario)=\beta_0+\beta_1 homeruns + \beta_2 homeruns^2 +u$$`
+
+Noten que usamos la notiación *I()* para indicar que la variable dentro del paréntesis se eleva a cierta potencia
+
+]
+
+.pull-right[
+
+```r
+res4 &lt;- lm(data=data.mlb, lsalary ~ hmrun+I(hmrun^2)) 
+summary(res4)
+## 
+## Call:
+## lm(formula = lsalary ~ hmrun + I(hmrun^2), data = data.mlb)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8656 -0.6738  0.1127  0.6202  2.3121 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  5.3505568  0.1214194  44.067  &lt; 2e-16 ***
+## hmrun        0.0726404  0.0196266   3.701 0.000262 ***
+## I(hmrun^2)  -0.0012648  0.0006211  -2.036 0.042738 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.8329 on 260 degrees of freedom
+## Multiple R-squared:  0.1294,	Adjusted R-squared:  0.1227 
+## F-statistic: 19.32 on 2 and 260 DF,  p-value: 1.505e-08
+```
+]
+
+---
+
+class: inverse, middle, center
+
+# Pruebas de hipótesis
+
+---
+
+# Prueba `\(t\)`
+
+Además del signo y la magnitud de los coeficientes de regresión, siempre ponemos atención al estadístico `\(t\)` estimado
+
+Nos interesa probar la hipótesis de que un coeficiente es igual a cierto número
+
+Formulamos lo que conocemos como **hipótesis nula**:
+
+`$$H_0: \beta_j=a_j$$`
+Si la `\(H_0\)` no se cumple, entonces:
+
+- Para una prueba de dos colas, favorecemos la **hipótesis alternativa** `\(H_a=\beta_j\neq a_j\)`
+
+- Para una prueba de una cola, favorecemos `\(H_a: \beta_j&lt;a_j\)` o que `\(H_a:\beta_j&gt;a_j\)`
+
+---
+
+# Estadístico `\(t\)`
+
+Si la `\(H_0\)` es verdadera, tenemos el siguiente resultado:
+
+`$$t=\frac{\beta_j-a_j}{se(\beta_j)}\sim t(n-k-1)$$`
+`\(n-k-1\)` son los grados de libertad
+
+---
+
+# Coeficientes de regresión
+
+Frecuentemente queremos probar que `\(H: \beta_j=0\)`
+
+En este caso, el estadístico `\(t\)` es
+
+`$$t_{\hat{\beta}_j}=\frac{\hat{\beta}_j}{se(\hat{\beta}_j)}$$`
+---
+
+# Nivel de significancia
+
+El nivel de significancia `\(\alpha\)` es la probabilidad de rechazar una hipótesis nula dado que esta es correcta
+
+En economía usamos frecuentemente `\(\alpha=0.05\)`, es decir, que tenemos el riesgo de que 5% de las veces que rechacemos la hipótesis nula en realidad no deberíamos rechazarla
+
+Es un parámetro escogido por el econometrista
+
+---
+
+# Regla de decisión
+
+Nosotros sabemos qué valores en la distribución teórica `\(t(n-k-1)\)` ocurren con una probabilidad mayor que `\(\alpha\)` y qué valores son muy poco probables
+
+El valor crítico `\(c\)` nos corta los valores entre aquellos que son 95% o más probables de ver y los que son 5% o menos probables de ver
+
+Si el estadístico `\(t_{\hat{\beta}_j}\)` es más grande que `\(c\)`, es decir, es poco común bajo la `\(H_0\)`, tenemos evidencia para rechazarla
+
+Para valores de grados de libertad lo suficientemente grandes, el valor crítico es muy cercado a 2
+
+De aquí viene nuestra *regla de dedo* de decir que un coeficiente es estadísticamente significativo, a un nivel de significancia de 5%, cuando su estadístico `\(t\)` asociado es mayor que 2
+
+---
+
+# Valor `\(p\)`
+
+El valor `\(p\)` es el número más pequeño de `\(\alpha\)` para el que aún rechazaríamos `\(H_0\)`
+
+Valores `\(p\)` muy grandes, por ejemplo 25%, indicarían que rechacemos `\(H_0\)` solo si estamos dispuestos a cometer el error de rechazar hasta 25% de las `\(H_0\)` verdaderas
+
+
+---
+
+# Intuición de las pruebas de hipótesis
+
+Todas las pruebas de hipótesis tienen la misma intuición
+
+- Tenemos una `\(H_0\)` que queremos probar
+- Construimos un estadístico del que podemos conocer sus propiedades teóricas
+- Fijamos `\(\alpha\)`
+- Queremos determinar qué tan probable es ver la magnitud del estadístico bajo la `\(H_0\)`
+- Si esta probabilidad es pequeña, rechazamos `\(H_0\)`
+
+El valor `\(p\)` y la magnitud del estadístico `\(t\)` son dos caras de la misma moneda
+
+Valores `\(p\)` muy pequeños indican una probabilidad muy pequeña de rechazar `\(H_0\)` que son ciertas y, por tanto, el valor del estadístico `\(t\)` indicará que es muy poco probable ver dicha magnitud bajo la `\(H_0\)`
+
+---
+
+# Intervalos de confianza
+
+Los intervalos de confianza definen una región (un rango de valores) dentro de los cuales esperaríamos que estuviera el valor verdadero de `\(\beta_j\)`
+
+Un intervalo de confianza de 95% indica que, si tuviéramos acceso a repetidas muestras de la misma población, 95% de los intervalos de confianza contendrían al valor verdadero de `\(\beta_j\)`
+
+
+--
+
+class: inverse, center, middle
+  
+# Distibución asintótica de `\(\beta_{MCO}\)`
+
+---
+
+# Consistencia
+
+- Consideremos el proceso generador de datos `\(y=X\beta+\)`
+
+$$
+`\begin{aligned}
+\hat{\beta}_{MCO}&amp;=(X'X)^{-1}X'Y \\
+&amp;=(X'X)^{-1}X'(X\beta + u) \\
+&amp;=(X'X)^{-1}X'X\beta+(X'X)^{-1}X'U \\
+&amp;=\beta+(X'X)^{-1}X'u
+\end{aligned}`
+$$
+
+- Reescalando:
+
+`$$\hat{\beta}_{MCO}=\beta+(N^{-1}X'X)^{-1}N^{-1}X'u$$`
+- Noten que `\(N^{-1}X'X=N^{-1}\sum_{i=1}{N}x_ix_i'\)` es un promedio
+
+- Si  `\(x_ix_i'\)` permite aplicar una LGN, entonces el promedio converge en probabilidad a una matriz finita distinta de `\(\mathbf{0}\)`
+
+---
+
+# Consistencia
+
+- Si una LGN puede aplicarse, entonces usando el Teorema de Slutsky:
+
+`$$p\lim \hat{\beta}_{MCO}=\beta+(p\lim N^{-1}X'X)^{-1}(p\lim N^{-1}X'u)$$`
+
+
+- Entonces `\(\beta_{MCO}\)` es consistente para `\(\beta\)`, es decir, `\(p\lim\hat{\beta}_{MCO}=\beta\)` si `\(p\lim N^{-1}X'u=0\)`
+
+- Si se puede aplicar una LGN al promedio `\(N^{-1}X'u=N^{-1}\sum_ix_iu_i\)` , una condición necesaria es que `\(E(x_iu_i)=0\)`
+
+- Esta es la condición sobre los errores que enumerábamos en nuestra lista de supuestos en los cursos básicos de econometría
+
+---
+
+# Distribución límite
+
+- Dada la consistencia del estimador de MCO,la distribución límite de `\(\beta_{MCO}\)` tiene toda su masa en `\(\beta\)`
+
+- Podemos reescalar multiplicando por `\(\sqrt{N}\)`, lo que nos permite obtener una variable aleatoria con varianza distinta de cero y asintóticamente finita:
+
+`$$\sqrt{N}(\hat{\beta}_{MCO}-\beta)=(N^{-1}X'X)^{-1}N^{-1/2}X'u$$`
+
+- Sabemos que `\(p\lim(N^{-1}X'X)\)` existe y es una matriz finida distinta de `\(\mathbf{0}\)`
+
+- Si se puede aplicar un TLC, `\(N^{-1/2}X'u\)` tendrá una distribución con matriz de covarianzas no singular y finita
+
+- Por la regla del límite normal del producto `\((N^{-1}X'X)^{-1}N^{-1/2}X'u\)` tendrá una distribución límite normal
+
+---
+
+# Distribución del estimador de MCO
+
+- Supuestos:
+  1. El proceso generador de datos es `\(y=X\beta+u\)`
+  1. Los datos son independientes entre `\(i\)`, `\(E(u|X)=0\)` y `\(E(uu'|X)=\Omega=Diag(\sigma_i^2)\)`
+  1. `\(X\)` es de rango completo
+  1. La matriz `\(M_{XX}=p\lim N^{-1}X'X=\lim\sum_iE(x_ix_i')\)` existe y es finita y no singular
+  1. El vector `\(N^{-1/2}X'u\xrightarrow{d}\mathcal{N}(0,M_{X\Omega X})\)`, donde
+  `$$M_{X\Omega X}=p\lim N^{-1}X'uu'X=\lim N^{-1}\sum_iE(u_i^2x_ix_i')$$`
+  
+- Entonces `\(\hat{\beta}_{MCO}\)` es consitente para `\(\beta\)` y la *distribución limite* de `\(\sqrt{N}(\hat{\beta}_{MCO}-\beta)\)` es
+
+`$$\sqrt{N}(\hat{\beta}_{MCO}-\beta)\xrightarrow{d}\mathcal{N}(0,M_{XX}^{-1}M_{X\Omega X}M_{XX}^{-1})$$`
+
+---
+
+# Distribución asintótica del estimador de MCO
+
+- Podemos expresar el resultado en términos de  `\(\hat{\beta}_{MCO}\)` dividiendo por `\(\sqrt{N}\)` y sumando `\(\beta\)`:
+
+`$$\hat{\beta}_{MCO} \stackrel{a}{\sim} \mathcal{N}(\beta,N^{-1}M_{XX}^{-1}M_{X\Omega X}M_{XX}^{-1})$$`
+
+- A la matriz `\(V(\hat{\beta})=N^{-1}M_{XX}^{-1}M_{X\Omega X}M_{XX}^{-1}\)` es la *matriz de varianza asintótica*
+
+- Eliminado los límites y las expectativas, una forma más compacta de escribit la distribución del estimador de MCO es
+
+`$$\hat{\beta}_{MCO} \stackrel{a}{\sim} \mathcal{N}(\beta,(X'X)^{-1}X'\Omega X (X'X)^{-1})$$`
+
+- En la práctica, reemplazamos `\(M_{XX}\)` y `\(M_{X\Omega X}\)` por estimadores consistentes para obtener la *matriz estimada de la varianza asintótica*:
+
+`$$\hat{V}(\hat{\beta})=N^{-1}\hat{M}_{XX}^{-1}\hat{M}_{X\Omega X}\hat{M}_{XX}^{-1}$$`
+
+---
+
+# El estimador de *sándwich*
+
+- Frecuentemente nos toparemos con el estimador de la varianza de *sándwich* del tipo `\(\hat{M}_{XX}^{-1}\hat{M}_{X\Omega X}\hat{M}_{XX}^{-1}\)`
+
+- Un estimador para `\(\hat{M}_{XX}\)` es `\(N^{-1}X'X\)`
+
+- El estimador de `\(\hat{M}_{M\Omega M}\)` depende de lo que asumamos de los errores
+
+- En los primeros cursos de econometría se asumen errores homocedásticos tales que `\(\Omega=\sigma^2I\)`, por lo que:
+
+`$$\hat{V}(\hat{\beta}_{MCO,iid})=\hat{s}^2(X'X)^{-1}$$`
+
+- Con errores heterocedásticos, es decir, que dependen de `\(X_i\)`, la v
+
+- Pero si `\(V(u_i|x_i)=E(u_i^2|x_i)=\sigma_i^2\)`, es decir, los errores varían con `\(i\)`, White (1980) propone usar como estimador de la varianza a `\(\hat{M}_{X\Omega X}=N^{-1}\sum_i \hat{u}_i^2x_ix_i'\)`, dando lugar a:
+
+
+---
+
+# Próxima sesión
+
+- Estudiaremos la violación al supuesto de errores ortogonales
+
+- Estudiaremos el uso de variables instrumentales para resolver el problema de endogeneidad
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="libs/cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

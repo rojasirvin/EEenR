@@ -26,3 +26,7 @@ Aquí podrán encontrar las diapositivas del curso.
 [Sesión 6](https://rojasirvin.github.io/EEenR/slides/sesion6.html#1). Principios de gráficas en R
 
 [Sesión 7](https://rojasirvin.github.io/EEenR/slides/sesion7.html#1). Elementos intermedios de programación en R
+
+[Sesión 9](https://rojasirvin.github.io/EEenR/slides/sesion9.html#1). Teoría asintótica
+
+[Sesión 10](https://rojasirvin.github.io/EEenR/slides/sesion10.html#1). Modelos lineales
