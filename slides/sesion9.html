@@ -111,7 +111,7 @@ Buscamos entonces que la **probabilidad** de estar en el límite de `\(\varepsil
 
 `$$Pr(|b_n-b|&lt;\varepsilon) &gt; 1-\delta$$`
 
-La notación más usada es escribir `\(p\lim b=b\)` o `\(b_n\xrightarrow{p}b\)`, donde `\(b\)` puede ser una constante o una variable aleatoria
+La notación más usada es escribir `\(p\lim b_n=b\)` o `\(b_n\xrightarrow{p}b\)`, donde `\(b\)` puede ser una constante o una variable aleatoria
 
 Comúnmente escribimos `\(b_n\xrightarrow{p}b\)` como `\(b_n-b\xrightarrow{p}0\)`
 
@@ -129,16 +129,16 @@ Comúnmente escribimos `\(b_n\xrightarrow{p}b\)` como `\(b_n-b\xrightarrow{p}0\)
 
 # Ejemplo
 
-Recordemos que la distribución normal está dada por la siguiente función de distribución:
+Recordemos que la distribución uniforme está dada por la siguiente función de distribución:
 
-`$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad 0 \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$`
+`$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad a \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$`
 Y que la esperanza es:
 
 `$$E(X)=\frac{a+b}{2}$$`
 
 --
 
-Generemos datos de una distribución uniforme con media cero ($\mu=0$)
+Generemos datos de una distribución uniforme con media cero, `\(\mu=0\)`
 
 Establezcamos el rango de la distribución como `\(\mu+z=z\)` y `\(\mu-z=-z\)`
 
@@ -415,9 +415,8 @@ sample &lt;- rnorm(100,10,2)
 
 # Veamos 10 de las observaciones
 head(sample,10)
-#  [1] 11.679922 10.180688  8.030958  8.018253
-#  [5]  7.965878  5.945978 10.727039  6.837412
-#  [9]  9.181732  9.916600
+#  [1] 11.679922 10.180688  8.030958  8.018253  7.965878  5.945978 10.727039
+#  [8]  6.837412  9.181732  9.916600
 
 #¿Cuál es la media muestral?
 mean(sample)
@@ -491,8 +490,8 @@ Veamos la media y desviación estándar de las medias calculadas:
 
 ```r
 mean(ymedias)
-## Warning in mean.default(ymedias): argument is not
-## numeric or logical: returning NA
+## Warning in mean.default(ymedias): argument is not numeric or logical: returning
+## NA
 ## [1] NA
 
 var(ymedias)

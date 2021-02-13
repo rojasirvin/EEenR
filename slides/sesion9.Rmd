@@ -121,7 +121,7 @@ Buscamos entonces que la **probabilidad** de estar en el límite de $\varepsilon
 
 $$Pr(|b_n-b|<\varepsilon) > 1-\delta$$
 
-La notación más usada es escribir $p\lim b=b$ o $b_n\xrightarrow{p}b$, donde $b$ puede ser una constante o una variable aleatoria
+La notación más usada es escribir $p\lim b_n=b$ o $b_n\xrightarrow{p}b$, donde $b$ puede ser una constante o una variable aleatoria
 
 Comúnmente escribimos $b_n\xrightarrow{p}b$ como $b_n-b\xrightarrow{p}0$
 
@@ -139,16 +139,16 @@ $$p\lim \hat{\theta}=\theta_0$$
 
 # Ejemplo
 
-Recordemos que la distribución normal está dada por la siguiente función de distribución:
+Recordemos que la distribución uniforme está dada por la siguiente función de distribución:
 
-$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad 0 \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$
+$$f(x)=\cases{ \frac{1}{b-a} \quad \text{si}\quad a \leq x \leq b  \\ 0 \quad \text{en otro caso} }$$
 Y que la esperanza es:
 
 $$E(X)=\frac{a+b}{2}$$
 
 --
 
-Generemos datos de una distribución uniforme con media cero ($\mu=0$)
+Generemos datos de una distribución uniforme con media cero, $\mu=0$
 
 Establezcamos el rango de la distribución como $\mu+z=z$ y $\mu-z=-z$
 
