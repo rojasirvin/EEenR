@@ -37,13 +37,17 @@ class: title-slide
 ---
 # Agenda
   
-1. 
+1. Repasaremos la definición del estimador de MCO
+
+1. Usaremos R para implementar el estimador de MCO
+
+1. Estudiaremos las propiedades asintóticas del estimador de MCO
 
 ---
 
 class: inverse, middle, center
 
-Estimador de MCO
+# Estimador de MCO
 
 ---
 
@@ -292,6 +296,18 @@ summary(res4)
 
 ---
 
+# Ejercicio 2
+
+1. Genere una variable categórica llamada **novato** que indique a los jugadores con 2 o menos años de experiencia, **years**
+
+1. Incluya esta variable como una *dummy* en el modelo log-log del Ejercicio 1
+
+1. ¿Cómo se interpreta el coeficiente sobre **novato**?
+
+
+
+---
+
 class: inverse, middle, center
 
 # Pruebas de hipótesis
@@ -399,7 +415,7 @@ class: inverse, center, middle
 
 # Consistencia
 
-- Consideremos el proceso generador de datos `\(y=X\beta+\)`
+- Consideremos el proceso generador de datos `\(y=X\beta+u\)`
 
 $$
 `\begin{aligned}
@@ -413,7 +429,7 @@ $$
 - Reescalando:
 
 `$$\hat{\beta}_{MCO}=\beta+(N^{-1}X'X)^{-1}N^{-1}X'u$$`
-- Noten que `\(N^{-1}X'X=N^{-1}\sum_{i=1}{N}x_ix_i'\)` es un promedio
+- Noten que `\(N^{-1}X'X=N^{-1}\sum_{i=1}^{N}x_ix_i'\)` es un promedio
 
 - Si  `\(x_ix_i'\)` permite aplicar una LGN, entonces el promedio converge en probabilidad a una matriz finita distinta de `\(\mathbf{0}\)`
 
@@ -444,7 +460,7 @@ $$
 
 - Sabemos que `\(p\lim(N^{-1}X'X)\)` existe y es una matriz finida distinta de `\(\mathbf{0}\)`
 
-- Si se puede aplicar un TLC, `\(N^{-1/2}X'u\)` tendrá una distribución con matriz de covarianzas no singular y finita
+- Si se puede aplicar un TLC, `\(N^{-1/2}X'u\)` tendrá una distribución con matriz de varianzas no singular y finita
 
 - Por la regla del límite normal del producto `\((N^{-1}X'X)^{-1}N^{-1/2}X'u\)` tendrá una distribución límite normal
 
@@ -474,7 +490,7 @@ $$
 
 - A la matriz `\(V(\hat{\beta})=N^{-1}M_{XX}^{-1}M_{X\Omega X}M_{XX}^{-1}\)` es la *matriz de varianza asintótica*
 
-- Eliminado los límites y las expectativas, una forma más compacta de escribit la distribución del estimador de MCO es
+- Eliminado los límites y las expectativas, una forma más compacta de escribir la distribución del estimador de MCO es
 
 `$$\hat{\beta}_{MCO} \stackrel{a}{\sim} \mathcal{N}(\beta,(X'X)^{-1}X'\Omega X (X'X)^{-1})$$`
 
@@ -499,6 +515,29 @@ $$
 - Con errores heterocedásticos, es decir, que dependen de `\(X_i\)`, la v
 
 - Pero si `\(V(u_i|x_i)=E(u_i^2|x_i)=\sigma_i^2\)`, es decir, los errores varían con `\(i\)`, White (1980) propone usar como estimador de la varianza a `\(\hat{M}_{X\Omega X}=N^{-1}\sum_i \hat{u}_i^2x_ix_i'\)`, dando lugar a:
+
+---
+
+# Errores robustos en R
+
+Para implementar errores robustos en R usamos la función *coeftest()*
+
+Debemos especificar un objeto donde hemos guardado los resultados de una estimación de un modelo lineal
+
+Tenemos que especificar qué tipos de errores robustos
+
+Hay varias propuestas (ver por ejemplo Mostly Harmless Econometrics, p. 304)
+
+---
+
+# Ejercicio 3
+
+1. Estime el modelo del Ejercicio 2, esta vez usando errores estándar robustos a heterocedasticidad
+
+1. Compare los coeficientes estimados con respecto al Ejercicio 2
+
+1. Compare los errores estándar estimados con respecto al Ejercicio 2
+
 
 
 ---

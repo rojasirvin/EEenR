@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Máxima verosimilitud</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Irvin Rojas" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+    <script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+    <link rel="stylesheet" href="libs/cide.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap-grid.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide
+
+
+
+.title[
+# Sesión 12. Máxima verosimilitud
+]
+
+.subtitle[
+## Estadística y Econometría en R
+]
+
+.author[
+### Irvin Rojas &lt;br&gt; [rojasirvin.com](https://www.rojasirvin.com/) &lt;br&gt; [&lt;i class="fab fa-github"&gt;&lt;/i&gt;](https://github.com/rojasirvin) [&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;](https://twitter.com/RojasIrvin) [&lt;i class="ai ai-google-scholar"&gt;&lt;/i&gt;](https://scholar.google.com/citations?user=FUwdSTMAAAAJ&amp;hl=en)
+]
+
+---
+# Agenda
+  
+1. Estudiaremos el problema de máxima verosimilitud
+
+1. Analizaremos el problema de la estimación de probabilidades no lineales
+
+1. Implementaremos modelos probit y logit en R
+
+1. Interpretaremos los resultados de la estimación de modelos de probabilidad no lineal
+
+---
+
+# Estimadores no lineales
+
+Los estimadores no lineales son funciones no lineales de la variable dependiente
+
+Pueden surgir por:
+   - Variable dependiente categórica o de conteo
+   
+   - Censura o truncamiento
+   
+   - Selección de la muestra
+
+En este curso nos enfocaremos en los modelos de variable dependiente binaria y los modelos de conteo
+
+---
+
+# Principio de máxima verosimilitud
+
+La función de masa de probabilidad o densidad `\(f(y,X|\theta)\)` es una función del parámetro `\(\theta\)` y los datos `\((y,X)\)`
+
+A esto se le llama **función de verosimilitud** y frecuentemente se le denota `\(L_N(\theta|y,X)\)`
+
+El problema de máxima verosimilitud consiste en estimar el vector de parámetros para `\(\theta_0\)` que maximice la probabilidad de observar los datos
+
+Maximizar `\(L_N\)` es equivalente a maximizar  `\(\mathcal{L}_N(\theta)=\ln(L_N(\theta))\)` 
+
+Cuando trabajamos con secciones cruzadas con observaciones independientes, `\(f(y|X,\theta)=\Pi_i f(y_i|x_i,\theta)\)`
+
+Y entonces, la función de log verosimilitud se define como:
+
+`$$Q_N(\theta)=N^{-1}\mathcal{L}(\theta)=N^{-1}\sum_i\ln f(y_i|x_i,\theta)$$`
+---
+
+# Estimador de máxima verosimilitud
+
+El **estimador de máxima verosimilitud** es el estimador que maximiza la función de log verosimilitud
+
+Formalmente, se conoce como el **estimador de maxima verosimilitud condicional** al máximo local que satisface la condición de primer orden:
+
+`$$\frac{1}{N}\frac{\partial \mathcal{L}_N(\theta)}{\partial \theta }=\frac{1}{N}\sum_i\frac{\partial \ln f(y_i|x_i,\theta)}{\partial \theta}=0$$`
+
+El adjetivo de **condicional** se debe a que el estimador se basas en la densidad de `\(y\)` dado `\(x\)`, pero comúnmente se emplea solo el término de estimador de máxima verosimilitud
+
+Al vector gradiente de primeras derivadas parciales `\(s(\theta)=\frac{\mathcal{L}_N(\theta)}{\partial \theta}\)` se le conoce como **vector score**
+
+Al score evaluado en `\(\theta_0\)` se le conoce como **score eficiente**
+
+---
+
+# Estimador de máxima verosimilitud
+
+El estimador de máxima verosimilitud es comúnmente usado en econometría
+
+Es el estimador más eficiente de entre los estimadores asintóticamente normales
+
+El principio de verosimilitud (Fisher, 1922) consiste en escoger el vector de parámetros que maximice la probabilidad de observar los datos
+
+En este contexto, consideramos a la función de masa de probabilidad o densidad `\(f(y,X|\theta)\)` como una función de `\(\theta\)`, dados unos datos `\((y,X)\)`
+
+Recordemos que el **estimador de máxima verosimilitud condicional** al máximo local que satisface la condición de primer orden:
+
+`$$\frac{1}{N}\frac{\partial \mathcal{L}_N(\theta)}{\partial \theta }=\frac{1}{N}\sum_i\frac{\partial \ln f(y_i|x_i,\theta)}{\partial \theta}=0$$`
+---
+
+# Ejemplo Bernoulli
+
+Una de las aplicaciones que veremos más adelante trata el problema de modelos de probabilidad no lineal
+
+Consideremos un evento que tiene probabilidad de ocurrir `\(p\)` y de no ocurrir `\(1-p\)`
+
+`$$y=\cases{1\quad \text{con probabilidad}\quad p \\ 0 \quad \text{con probabilidad}\quad 1-p}$$`
+
+Podemos escribir la función de probabilidad como
+
+`$$f(y_i)=p_i^{y_i}(1-p_i)^{1-y_i}$$`
+Usamos una serie de características `\(x_i\)` para modelar las probabilidades:
+
+`$$p_i=F(x_i'\beta)$$`
+Y la función de verosimilitud de la `\(i\)`-ésima observación es
+
+`$$f(y_i|x_i,\beta)=F(x_i'\beta)^{y_i}(1-F(x_i'\beta))^{1-y_i}$$`
+---
+
+# Ejemplo Bernoulli
+
+El problema de máxima verosimilitud con una muestra `\(\{(y_i,x_i\}\)` con `\(N\)` datos consiste en encontrar `\(\beta\)` que maximice la función de log verosimilitud
+
+La función de verosimilitud es la densidad conjunta
+
+--
+
+Bajo independencia, la densidad conjunta es `\(\Pi_i f(y_i|x_i,\beta)\)`
+
+Y la función de log verosimilitud es el log del producto, es decir, la suma de los logs: `\(\sum_i \ln f(y_i|x_i,\beta)\)`
+
+En nuestro ejemplo Bernoulli, la log densidad para la observación `\(i\)` es:
+
+`$$\mathcal{l}_i(y_i|x_i,\beta) =\ln f(y_i|x_i,\beta)=y_i \ln(F(x_i'\beta))+(1-y_i)\ln(1-F(x_i'\beta))$$`
+---
+
+# El estimador de MV en el caso Bernoulli
+
+El estimador `\(\hat{\beta}_{MV}\)` maximiza la función objetivo
+
+`$$Q_N(\beta)=\frac{1}{N}\sum_i \left(y_i \ln(F(x_i'\beta))+(1-y_i)\ln(1-F(x_i'\beta))\right)$$`
+
+La condición de primer orden es:
+
+`$$\frac{1}{N}\sum_i\left(\frac{y_i}{F(x_i'\beta)}f'(x_i'\beta)x_i-\frac{1-y_i}{1-F(x_i'\beta)}f'(x_i'\beta)x_i\right)\Bigg|_{\hat{\beta}}=0$$`
+
+Noten que si `\(F(\cdot)\)` es la función acumulativa, entonces `\(F'(\cdot)=f(\cdot)\)` es la función de densidad
+
+Esta expresión no tiene una solución cerrada y usamos métodos numéricos para calcular `\(\hat{\beta}\)`
+
+Se buscan los valores de `\(\beta\)` que hagan que la condición de primer orden se cumpla (hasta cierto nivel de tolerancia)
+
+---
+
+class: inverse, middle, center
+
+# Distribución del estimador de MV
+
+
+---
+
+# Distribución del estimador de MV
+
+Supongamos:
+
+1. El pgd es la densidad condicional `\(f(y_i|x_i,\theta)\)` usada para definir la función de verosimilitud
+
+1. La función de densidad `\(f(\cdot)\)` satisface `\(f(y,\theta^{(1)})=f(y,\theta^{(2)})\)` si y solo si `\(\theta^{(1)}=\theta^{(2)}\)`
+
+1. La matriz `\(A_0=p\lim\frac{1}{N}\frac{\partial^2\mathcal{L}_N(\theta)}{\partial \theta \partial\theta'}\Bigg|_{\theta_0}\)` existe y es no singular
+
+1. El orden de la diferenciación e integración de la función de log verosimilitud puede ser invertido
+  
+--
+
+Entonces el estimador de MV, definido como la solución a las condiciones de primer orden, es consistente para `\(\theta_0\)` y
+
+`$$\sqrt{N}(\hat{\theta}_{MV}-\theta_0)\xrightarrow{d}\mathcal{N}(0,-A_0^{-1})$$`
+---
+
+# Distribución del estimador de MV
+
+La condición clave es 1, es decir, que el modelo está correctamente especificado
+
+La condición 2 es técnica e implica identificación
+
+La condición 3 es parecida a lo que asumiamos en MCO para poder aplicar una LGN al promedio `\(N^{-1}X'X\)`
+
+La mayoría de nuestras aplicaciones satisfacen el supuesto 4. Este supuesto excluye a las distribuciones cuyos rangos depende de `\(\theta\)`, como la uniforme
+
+
+---
+
+class: inverse, middle, center
+
+
+# Modelos de probabilidad no lineal
+
+---
+
+# Variable dependiente binaria
+
+`\(y_i\)` toma el valor de 1 si el evento se realiza y 0 si no
+
+Los datos siguen una distribución Bernoulli con probabilidad que varía entre individuos: `\(p\equiv p_i\)`
+
+Especificamos una forma funcional para la probabilidad y se estima por MV
+
+---
+
+# Modelo general
+
+La variable dependiente:
+$$
+y_i=
+`\begin{cases}
+1 \quad\text{con probabilidad}\quad p \\
+0 \quad\text{con probabilidad}\quad 1-p
+\end{cases}`
+$$
+Parametrizamos `\(p_i\)` con un vector de características `\(x_i\)` y un vector de parámetros `\(\beta\)`:
+
+`$$p_i=F(y_i=1|x_i)=F(x_i'\beta)$$`
+- A `\(x_i'\beta\)` se le conoce como *índice*, por lo que este modelo es también un modelo de un índice único
+
+--
+
+`\(F\)` es una función de distribución acumulada (cdf)
+
+Un modelo de probabilidad lineal simplemente especifica `\(p_i=x_i'\beta\)`
+
+---
+
+# Probit y logit
+
+Un modelo probit especifica `\(F\cdot\)` como una normal estándar con cdf dada por:
+
+`$$\Phi(x'\beta)=\int_{-\infty}^{\infty}\phi(z)dz$$`
+
+--
+
+Un modelo logit especifica a `\(F\cdot\)` como una función logística:
+
+`$$\Lambda(x'\beta)=\frac{exp\{x'\beta\}}{1+exp\{x'\beta\}}$$`
+
+---
+
+# Efectos marginales
+
+En un modelo lineal, `\(\beta_j\)` tiene la interpretación directa del efecto de un cambio marginal en `\(x_j\)` sobre `\(y\)`
+
+En cambio, en los modelos de probabilidad no lineal estamos interesaods en:
+
+`$$\frac{\partial P(y_i=1)|x_i)}{\partial x_{ij}}=F'(x_i'\beta)\beta_j$$`
+
+Como `\(F(\cdot)\)` es no lineal, los efectos marginales difieren del punto de evaluación, es decir, de `\(x_i'\beta\)`
+
+--
+
+En el caso probit:
+
+`$$\frac{\partial P(y_i=1)|x_i)}{\partial x_{ij}}=\phi(x'\beta)\beta_j$$`
+
+--
+
+En el caso logit:
+
+`$$\frac{\partial P(y_i=1)|x_i)}{\partial x_{ij}}=\Lambda(x'\beta)(1-\Lambda(x'\beta))\beta_j$$`
+
+---
+
+# Efectos marginales
+
+Dos efectos marginales que podemos calcular:
+
+1. Promedio de efectos marginales (más usado)
+
+    `$$\frac{1}{N}\sum_i F'(x_i'\hat{\beta})\hat{\beta}_j$$`
+
+1. Efecto marginal evaluado en la media de `\(x\)` (menos usado)
+
+    `$$F'(\bar{x}'\hat{\beta})\hat{\beta}_j$$`
+
+--
+
+Noten que el cociente de efectos marginales es igual al cociente de los coeficientes estimados:
+
+`$$\frac{\frac{\partial P(y_i=1)|x_i)}{\partial x_{ij}}}{\frac{\partial P(y_i=1)|x_i)}{\partial x_{ik}}}=\frac{\hat{\beta}_j}{\hat{\beta}_k}$$`
+
+---
+
+# Estimación
+
+Tenemos a la mano datos `\((y_i,x_i)\)` de `\(N\)` individuos
+
+La función de masa de probabilidad para `\(y_i\)` es:
+
+`$$f(y_i|x_i)=p_i^{y_i}(1-p_i)^{1-y_i},\quad\quad y_i={0,1}$$`
+
+Recordemos que `\(p_i=F(x_i'\beta)\)`
+
+---
+
+# Estimación
+
+La función de log verosimilitud es
+
+
+`$$\mathcal{L}(\beta)=\sum_i\{y_i\ln F(x_i'\beta) + (1-y_i)\ln(1-F(x_i'\beta))\}$$`
+La condición de primer orden implica que `\(\hat{\beta}_{MV}\)` resuelve:
+
+`$$\sum_i \left(\frac{y_i-F(x_i'\beta)}{F(x_i'\beta)(1-F(x_i'\beta))}F'(x_i'\beta)x_i\right)=0$$`
+
+---
+
+# Particularidades del modelo logit
+
+Una medida comúnmente usada es la razón de momios u *odds ratio*, también llamado riesgo relativo: `\(\frac{p}{1-p}\)`
+
+El riesgo relativo es la probabilidad de que suceda `\(y=1\)` relativa a la probabilidad de que `\(y=0\)`
+
+En el caso del logit, el riesgo relativo es:
+
+`$$\frac{p}{1-p}=exp\{x'\beta\}$$`
+
+Y el log del riesgo relativo es simplemente:
+
+`$$\ln\left(\frac{p}{1-p}\right)=x'\beta$$`
+
+Es decir, el log del riesgo relativo o el log de la razón de momios es lineal en `\(x\)`
+
+---
+
+# Particularidades del modelo logit
+
+Noten que expresar las probabilidades como riesgo relativo tiene una interpretación usada comúnmente en bioestadística
+
+Si `\(\frac{p}{1-p}=exp\{x'\beta\}\)` y `\(x_j\)` cambia en una unidad, entonces el lado derecho se vuelve `\(exp\{x'\beta+\beta_j\}=exp\{x'\beta\} exp\{\beta_j\}\)`
+
+Es decir, el riesgo relativo se ha incrementado `\(exp\{\beta_j\}\)` veces
+
+Supongamos que `\(\hat{\beta}_j=0.05\)`, entonces `\(exp\{0.05\}\approx 1.05\)`
+
+--
+
+Es decir, el riesgo relativo se incrementa en aproximadamente 5%
+
+---
+
+# ¿Probit o logit?
+
+Empíricamente suelen desempeñarse de forma muy similar
+
+Como nos interesan los efectos marginales, la diferencia entre los modelos usados suele ser mínima
+
+El modelo logit es frecuentemente usado en bioestadística por su interpretación en términos de riesgo relativo
+
+El probit se puede motivar por un modelo de variable latente normal, que se liga directamente al model Tobit (que veremos más adelante)
+
+---
+
+class: inverse, center, middle
+
+# Ejemplo con los datos de covid-19
+
+---
+
+# Datos de covid-19
+
+Usamos una base con los datos individuales de pacientes covid-19
+
+Construyo algunas variables dummy para hospitalizados, pacientes en UCI, pacientes con obesidad y que fuman
+
+Me quedo con 5% de los datos
+
+
+```r
+setwd("C:/Users/Irvin/Dropbox/Ejercicios en R/")
+
+data.covid &lt;- read_csv(file = "./datos/covid_limpia_210203.csv", locale = locale(encoding = "latin1"))
+
+data.covid &lt;- data.covid %&gt;% mutate(uci = ifelse(uci == "Sí", 1, 0)) %&gt;% mutate(fuma = ifelse(tabaquismo == 
+    "Sí", 1, 0)) %&gt;% mutate(hospital = ifelse(tipo_paciente == "Hospitalizado", 1, 
+    0)) %&gt;% mutate(obesidad = ifelse(obesidad == "Sí", 1, 0))
+
+set.seed(221)
+data.covid &lt;- slice_sample(data.covid, prop = 0.05)
+```
+
+Estos datos actualizan diario [acá](https://datos.covid-19.conacyt.mx/#DownZCSV)
+
+---
+# Datos de covid-19
+
+Exploramos un poco los datos
+
+
+
+---
+
+# Modelo de probabilidad lineal
+
+.pull-left[
+Modelamos la probabilidad de ser hospitalizado en función de la edad
+
+¿Cómo interpretamos el coeficiente sobre edad?
+]
+
+.pull-right[
+
+```r
+res.mco &lt;- lm(data = data.covid, formula = hospital ~ edad)
+summary(res.mco)
+```
+
+```
+## 
+## Call:
+## lm(formula = hospital ~ edad, data = data.covid)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.89100 -0.22916 -0.10047  0.01903  1.21207 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -0.2120660  0.0032495  -65.26   &lt;2e-16 ***
+## edad         0.0091922  0.0000693  132.63   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3601 on 94310 degrees of freedom
+## Multiple R-squared:  0.1572,	Adjusted R-squared:  0.1572 
+## F-statistic: 1.759e+04 on 1 and 94310 DF,  p-value: &lt; 2.2e-16
+```
+]
+---
+
+# Probit
+
+.pull-left[
+Ahora estimamos un mdelo probit
+
+
+
+```r
+# Para logit y probit usaremos solo barco y puerto
+
+res.probit &lt;- glm(data = data.covid, formula = hospital ~ edad, family = binomial(link = "probit"))
+```
+
+El coeficiente que obtenemos en la regresión es el coeficiente en el índice `\(x'\beta\)`.
+]
+
+.pull-right[
+
+```r
+summary(res.probit)
+```
+
+```
+## 
+## Call:
+## glm(formula = hospital ~ edad, family = binomial(link = "probit"), 
+##     data = data.covid)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.5231  -0.6502  -0.4170  -0.2543   3.2909  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -2.6158711  0.0169983  -153.9   &lt;2e-16 ***
+## edad         0.0362492  0.0003234   112.1   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 91686  on 94311  degrees of freedom
+## Residual deviance: 76721  on 94310  degrees of freedom
+## AIC: 76725
+## 
+## Number of Fisher Scoring iterations: 5
+```
+
+```r
+summary(res.probit)$coef
+```
+
+```
+##                Estimate   Std. Error   z value Pr(&gt;|z|)
+## (Intercept) -2.61587114 0.0169982841 -153.8903        0
+## edad         0.03624916 0.0003234269  112.0784        0
+```
+]
+---
+
+# Logit
+
+.pull-left[
+Y ahora el modelo logit
+
+Cambiamos a logit especificando la opción *link*
+]
+
+.pull-right[
+
+```r
+res.logit &lt;- glm(data = data.covid, formula = hospital ~ edad, family = binomial(link = "logit"))
+summary(res.logit)
+```
+
+```
+## 
+## Call:
+## glm(formula = hospital ~ edad, family = binomial(link = "logit"), 
+##     data = data.covid)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.5507  -0.6329  -0.4119  -0.2723   3.0537  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -4.6531217  0.0328342  -141.7   &lt;2e-16 ***
+## edad         0.0655569  0.0005969   109.8   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 91686  on 94311  degrees of freedom
+## Residual deviance: 76478  on 94310  degrees of freedom
+## AIC: 76482
+## 
+## Number of Fisher Scoring iterations: 5
+```
+]
+---
+
+# Comparación de modelos
+
+Un paquete útil para resumir resultados es *stargazer*
+
+
+```r
+library(stargazer)
+stargazer(res.mco, res.logit, res.probit, type = "text")
+```
+
+```
+## 
+## =========================================================================
+##                                      Dependent variable:                 
+##                     -----------------------------------------------------
+##                                           hospital                       
+##                                  OLS               logistic     probit   
+##                                  (1)                  (2)         (3)    
+## -------------------------------------------------------------------------
+## edad                          0.009***             0.066***    0.036***  
+##                               (0.0001)              (0.001)    (0.0003)  
+##                                                                          
+## Constant                      -0.212***            -4.653***   -2.616*** 
+##                                (0.003)              (0.033)     (0.017)  
+##                                                                          
+## -------------------------------------------------------------------------
+## Observations                   94,312               94,312      94,312   
+## R2                              0.157                                    
+## Adjusted R2                     0.157                                    
+## Log Likelihood                                    -38,239.030 -38,360.620
+## Akaike Inf. Crit.                                 76,482.060  76,725.240 
+## Residual Std. Error      0.360 (df = 94310)                              
+## F Statistic         17,592.150*** (df = 1; 94310)                        
+## =========================================================================
+## Note:                                         *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01
+```
+
+
+---
+
+# Predicción
+
+Los coeficientes de los modelos lineal, probit y logit no son comparables entre sí
+
+Recuerden que, para el caso logit y probit, hay una función `\(F(\cdot)\)` que mapea el índice en probabilidades
+
+Eso lo logramos especificando la opción *response*
+
+
+```r
+data.covid &lt;- data.covid %&gt;% mutate(p.lineal = predict(res.mco, type = "response")) %&gt;% 
+    mutate(p.probit = predict(res.probit, type = "response")) %&gt;% mutate(p.logit = predict(res.logit, 
+    type = "response"))
+```
+
+---
+
+# Predicción
+
+Ya que tenemos las predicciones de las probabilidades dadas las características de cada individuo, podemos graficarlas
+
+
+.pull-left[
+
+```r
+data.plot &lt;- data.covid %&gt;% select(p.lineal, p.probit, p.logit, edad) %&gt;% pivot_longer(cols = c("p.lineal", 
+    "p.probit", "p.logit"), names_to = "tipo", values_to = "efecto")
+```
+]
+
+.pull-right[
+
+```r
+data.plot %&gt;% ggplot() + geom_line(aes(x = edad, y = efecto, color = tipo)) + geom_hline(aes(yintercept = 0), 
+    color = "black", linetype = "dashed") + geom_hline(aes(yintercept = 1), color = "black", 
+    linetype = "dashed")
+```
+
+![](figures/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+]
+
+
+---
+
+# Modelo multivariado
+
+
+
+```r
+res.probit.2 &lt;- glm(data = data.covid, formula = hospital ~ edad + obesidad + fuma + 
+    sexo, family = binomial(link = "probit"))
+summary(res.probit.2)
+```
+
+```
+## 
+## Call:
+## glm(formula = hospital ~ edad + obesidad + fuma + sexo, family = binomial(link = "probit"), 
+##     data = data.covid)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4650  -0.6372  -0.4074  -0.2262   3.4760  
+## 
+## Coefficients:
+##               Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept) -2.5280349  0.0179802 -140.601   &lt;2e-16 ***
+## edad         0.0361491  0.0003269  110.580   &lt;2e-16 ***
+## obesidad     0.3168353  0.0133129   23.799   &lt;2e-16 ***
+## fuma        -0.0225608  0.0195954   -1.151     0.25    
+## sexoMujer   -0.2949691  0.0104291  -28.283   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 91686  on 94311  degrees of freedom
+## Residual deviance: 75402  on 94307  degrees of freedom
+## AIC: 75412
+## 
+## Number of Fisher Scoring iterations: 5
+```
+
+---
+
+# Efectos marginales
+
+.pull-left[
+
+Estamos interesados en `\(\frac{\partial P(y_i=1|x_i)}{\partial x_j}\)`
+
+Como vimos antes, esta derivada depende de `\(x\)` en el caso probit y logit
+
+Vimos que típicamente se presenta el promedio de los efectos marginales
+
+Calculamos `\(\frac{\partial P(y_i=1|x_i)}{\partial x_j}\)` para cada individuo y luego obtenemos el promedio
+
+Para esto usamos la librería *margins*
+]
+
+.pull-right[
+
+```r
+library(margins)
+
+summary(largo.mco &lt;- lm(data = data.covid, formula = hospital ~ edad + obesidad + 
+    fuma + sexo))
+```
+
+```
+## 
+## Call:
+## lm(formula = hospital ~ edad + obesidad + fuma + sexo, data = data.covid)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.8642 -0.2244 -0.1033  0.0349  1.2479 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -0.1810654  0.0035045 -51.667   &lt;2e-16 ***
+## edad         0.0090105  0.0000691 130.390   &lt;2e-16 ***
+## obesidad     0.0718187  0.0032939  21.803   &lt;2e-16 ***
+## fuma        -0.0032949  0.0044485  -0.741    0.459    
+## sexoMujer   -0.0667969  0.0023408 -28.536   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3577 on 94307 degrees of freedom
+## Multiple R-squared:  0.1684,	Adjusted R-squared:  0.1684 
+## F-statistic:  4775 on 4 and 94307 DF,  p-value: &lt; 2.2e-16
+```
+
+```r
+# Margins nos da el efecto marginal promedio
+summary(margins(largo.mco))
+```
+
+```
+##     factor     AME     SE        z      p   lower   upper
+##       edad  0.0090 0.0001 130.3896 0.0000  0.0089  0.0091
+##       fuma -0.0033 0.0044  -0.7407 0.4589 -0.0120  0.0054
+##   obesidad  0.0718 0.0033  21.8035 0.0000  0.0654  0.0783
+##  sexoMujer -0.0668 0.0023 -28.5357 0.0000 -0.0714 -0.0622
+```
+]
+
+---
+
+# Efectos marginales
+
+Ya esperábamos que en el caso lineal los efectos marginales fueran exactamente iguales a los coeficientes
+
+En el caso probit (y logit) no
+
+
+```r
+summary(margins(res.probit.2))
+```
+
+```
+##     factor     AME     SE        z      p   lower   upper
+##       edad  0.0081 0.0001 131.2676 0.0000  0.0080  0.0082
+##       fuma -0.0050 0.0044  -1.1513 0.2496 -0.0136  0.0035
+##   obesidad  0.0709 0.0030  23.9468 0.0000  0.0651  0.0767
+##  sexoMujer -0.0661 0.0023 -28.4626 0.0000 -0.0706 -0.0615
+```
+
+```r
+# En realidad el que nos importa es la edad, que cambia de forma continua
+summary(margins(res.probit.2, variables = "edad"))
+```
+
+```
+##  factor    AME     SE        z      p  lower  upper
+##    edad 0.0081 0.0001 131.2676 0.0000 0.0080 0.0082
+```
+
+---
+
+# Anatomía del efecto marginal
+
+Vamos a calcular el promedio de los efectos marginales *a mano*
+
+
+```r
+data.covid &lt;- data.covid %&gt;% mutate(efecto = dnorm(predict(res.probit.2, type = "link")) * 
+    summary(res.probit.2)$coef[2])
+
+mean(data.covid$efecto)
+```
+
+```
+## [1] 0.008084881
+```
+
+```r
+summary(margins(res.probit.2, variables = "edad"))
+```
+
+```
+##  factor    AME     SE        z      p  lower  upper
+##    edad 0.0081 0.0001 131.2676 0.0000 0.0080 0.0082
+```
+
+La ventaja del uso de *margins* es que tenemos un error estándar y la prueba de significancia
+
+---
+
+# Riesgo relativo
+
+Recordemos que para el logit tenemos una interpretación de riesgo relativo de los coeficientes estimados
+
+El riesgo relativo es `\(\frac{p}{1-p}=exp\{x'\beta\}\)`
+
+Si `\(x_j\)` cambia marginalmente, el riesgo relativo cambia en `\(exp\{x'\beta+\beta_j\}=exp\{x'\beta\}exp\{\beta_j\}\)`
+
+
+
+```r
+res.logit.2 &lt;- glm(data = data.covid, formula = hospital ~ edad + obesidad + fuma + 
+    sexo, family = binomial(link = "logit"))
+```
+
+---
+# Riesgo relativo
+
+Basta con exponenciar los coeficientes estimados
+
+
+```r
+exp(cbind(OR = coef(res.logit.2), confint(res.logit.2)))
+```
+
+```
+##                     OR      2.5 %    97.5 %
+## (Intercept) 0.01087485 0.01016249 0.0116320
+## edad        1.06795229 1.06669149 1.0692212
+## obesidad    1.77145485 1.69274995 1.8536016
+## fuma        0.98742055 0.92181404 1.0571120
+## sexoMujer   0.58750918 0.56630901 0.6094693
+```
+---
+# Próxima sesión
+
+Estudiaremos la estructura de los datos en panel
+
+Conoceremos los modelos en datos en panel
+
+Analizarmeos las propiedades de los estimadores de datos en panel
+
+---
+
+class: center, middle
+
+Presentación creada usando el paquete [**xaringan**](https://github.com/yihui/xaringan) en R.
+
+El *chakra* viene de [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), y [R Markdown](https://rmarkdown.rstudio.com).
+
+Material de clase en versión preliminar.
+
+**No reproducir, no distribuir, no citar.**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="libs/cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
