@@ -154,7 +154,7 @@ El estimador `\(\hat{\beta}_{MV}\)` maximiza la función objetivo
 
 La condición de primer orden es:
 
-`$$\frac{1}{N}\sum_i\left(\frac{y_i}{F(x_i'\beta)}f'(x_i'\beta)x_i-\frac{1-y_i}{1-F(x_i'\beta)}f'(x_i'\beta)x_i\right)\Bigg|_{\hat{\beta}}=0$$`
+`$$\frac{1}{N}\sum_i\left(\frac{y_i}{F(x_i'\beta)}F'(x_i'\beta)x_i-\frac{1-y_i}{1-F(x_i'\beta)}F'(x_i'\beta)x_i\right)\Bigg|_{\hat{\beta}}=0$$`
 
 Noten que si `\(F(\cdot)\)` es la función acumulativa, entonces `\(F'(\cdot)=f(\cdot)\)` es la función de densidad
 
