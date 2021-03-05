@@ -35,8 +35,6 @@ Aquí podrán encontrar las diapositivas del curso.
 
 [Sesión 12](https://rojasirvin.github.io/EEenR/slides/sesion12.html#1). Máxima verosimilitud}
 
-
-
-
-
 [Sesión 13](https://rojasirvin.github.io/EEenR/slides/sesion13.html#1). Datos en panel
+
+[Sesión 14](https://rojasirvin.github.io/EEenR/slides/sesion14.html#1). Métodos no paramétricos

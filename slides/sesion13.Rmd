@@ -532,11 +532,7 @@ Usamos la función *phtest()*
 ---
 # Próxima sesión
 
-Aprenderemos a visualizar datos con información georeferenciada
-
-Aprenderemos los conceptos básicos de la econometría espacial
-
-Aprenderemos a implementar modelos econométricos espacialese en R
+Aprenderemos conceptos básicos para representar datos y analizar datos sin imponer estructura paramétrica
 
 ---
 
